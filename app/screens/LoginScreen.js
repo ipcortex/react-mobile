@@ -14,6 +14,9 @@ export class LoginScreen extends React.Component {
   static navigationOptions = {
     title: `${Platform.OS} App Login`
   };
+
+
+
   render() {
     const {navigate} = this.props.navigation;
     return (<View>

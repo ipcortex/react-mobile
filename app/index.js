@@ -1,38 +1,92 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
-AppRegistry,
-  Platform,
-  StyleSheet,
-  Text,
-  View
+ Platform,
+ AppRegistry
 } from 'react-native';
+import {createStore, applyMiddleware, combineReducers} from "redux";
+import {Provider} from "react-redux";
+import { Navigation } from 'react-native-navigation';
+import registerScreens from './screens/screens.js';
+import * as reducers from "./reducers/index";
+import * as appActions from "./actions/index";
+import thunk from "redux-thunk";
+const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
+const reducer = combineReducers(reducers);
+const store = createStoreWithMiddleware(reducer);
+registerScreens(store, Provider);
 
-import { StackNavigator } from 'react-navigation';
+export default class  App extends Component {
 
-import { styles } from './config/styles.js';
-
-import { HomeScreen } from './screens/HomeScreen.js';
-import { ForwardScreen } from './screens/ForwardScreen.js';
-import { NightModeScreen } from './screens/NightModeScreen.js';
-
-const NativePlusWebApp = StackNavigator({
-  Home: { screen: HomeScreen },
-  Forward: { screen: ForwardScreen },
-  NightMode: { screen: NightModeScreen }
-});
-
-export default class App extends Component {
-  render() {
-    return(
-        <NativePlusWebApp />
-    );
+  constructor(props) {
+    super(props);
+    store.subscribe(this.onStoreUpdate.bind(this));
+    store.dispatch(appActions.appInitialized());
   }
+
+  onStoreUpdate() {
+      let {root} = store.getState().root;
+
+      // handle a root change
+      // if your app doesn't change roots in runtime, you can remove onStoreUpdate() altogether
+      if (this.currentRoot != root) {
+        this.currentRoot = root;
+        this.startApp(root);
+      }
+    }
+
+  startApp(root) {
+    switch (root) {
+        case 'login':
+          Navigation.startSingleScreenApp({
+                    screen: {
+                    screen: 'IPCMobile.Login', // unique ID registered with Navigation.registerScreen
+                    title: 'Welcome', // title of the screen as appears in the nav bar (optional)
+                    navigatorStyle: {}, // override the navigator style for the screen, see "Styling the navigator" below (optional)
+                    navigatorButtons: {} // override the nav buttons for the screen, see "Adding buttons to the navigator" below (optional)
+                    },
+                });
+                return;
+
+        case 'after-login':
+            Navigation.startTabBasedApp({
+                tabs: [
+                {
+                    label: 'Home',
+                    screen: 'IPCMobile.HomeTab',
+                    icon: require('./img/checkmark.png'),
+                    selectedIcon: require('./img/checkmark.png'),
+                    title: 'Hey',
+                    overrideBackPress: false,
+                    navigatorStyle: {}
+                },
+
+                {
+                    label: 'Forward',
+                    screen: 'IPCMobile.Forward',
+                    icon: require('./img/checkmark.png'),
+                    selectedIcon: require('./img/checkmark.png'),
+                    title: 'Forward',
+                    overrideBackPress: false,
+                    navigatorStyle: {}
+                },
+                {
+                    label: 'NightMode',
+                    screen: 'IPCMobile.NightMode',
+                    icon: require('./img/checkmark.png'),
+                    selectedIcon: require('./img/checkmark.png'),
+                    title: 'Nightmode',
+                    overrideBackPress: false,
+                    navigatorStyle: {}
+                },
+
+                ],
+            });
+            return;
+
+          default:
+            console.log("Not Root Found");
+        }
+    }
 }
 
-AppRegistry.registerComponent('NativePlusWebApp', () => NativePlusWebApp);
+AppRegistry.registerComponent('IPCMobile', () => App);

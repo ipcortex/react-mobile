@@ -19,11 +19,11 @@ const babelLoaderConfiguration = {
     path.resolve(rootDirectory, 'app'),
     path.resolve(rootDirectory, 'node_modules/react-native-uncompiled'),
     path.resolve(rootDirectory, 'node_modules/react-native-vector-icons'),
-    path.resolve(rootDirectory, 'node_modules/react-navigation'),
-    path.resolve(rootDirectory, 'node_modules/react-native-drawer-layout'),
-    path.resolve(rootDirectory, 'node_modules/react-native-dismiss-keyboard'),
-    path.resolve(rootDirectory, 'node_modules/react-native-safe-area-view'),
-    path.resolve(rootDirectory, 'node_modules/react-native-tab-view')
+    path.resolve(rootDirectory, 'node_modules/react-native-navigation')
+    //path.resolve(rootDirectory, 'node_modules/react-native-drawer-layout'),
+    //path.resolve(rootDirectory, 'node_modules/react-native-dismiss-keyboard'),
+    //path.resolve(rootDirectory, 'node_modules/react-native-safe-area-view'),
+    //path.resolve(rootDirectory, 'node_modules/react-native-tab-view')
   ],
   use: {
     loader: 'babel-loader',
