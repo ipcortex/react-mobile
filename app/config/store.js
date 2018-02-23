@@ -6,9 +6,9 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/es/storage";
 
-import counterReducer from "./src/Reducers/counterReducer";
-import NavigationReducer from "./src/Reducers/navigationReducer";
-import loginReducer from "./src/Reducers/loginReducer";
+import counterReducer from "../reducers/counterReducer";
+import NavigationReducer from "../reducers/navigationReducer";
+import loginReducer from "../reducers/loginReducer";
 
 // config to not persist the *counterString* of the CounterReducer's slice of the global state.
 const config = {
