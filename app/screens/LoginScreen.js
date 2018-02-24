@@ -13,10 +13,13 @@ import { login } from "../actions/actionCreator";
 
 import {styles} from '../config/styles.js';
 
-export class Login extends React.Component {
+class LoginScreen extends React.Component {
   static navigationOptions = {
     title: `${Platform.OS} App Login`
   };
+  static propTypes = {
+  navigation: PropTypes.object.isRequired,
+};
 
 
 
@@ -29,10 +32,6 @@ export class Login extends React.Component {
   }
 }
 
-const mapDispatchToProps = {
-  login
-};
-const LoginScreen = connect(null, mapDispatchToProps)(Login);
-export default LoginScreen;
-
 AppRegistry.registerComponent('LoginScreen', () => LoginScreen);
+
+export default LoginScreen;

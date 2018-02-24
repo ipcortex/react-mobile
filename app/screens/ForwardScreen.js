@@ -6,13 +6,14 @@ import {
   Text,
   View
 } from 'react-native';
+import { connect } from "react-redux";
 
 import { styles } from '../config/styles.js';
 
 import { PhoneNumber } from '../components/PhoneNumber';
 import { ForwardState } from '../components/ForwardState';
 
-export class ForwardScreen extends Component {
+class Forward extends Component {
   static navigationOptions = {
     title: 'Call Forwards'
   };
@@ -27,5 +28,12 @@ export class ForwardScreen extends Component {
 
   }
 }
+
+const mapDispatchToProps = {
+
+};
+
+const ForwardScreen = connect(null, mapDispatchToProps)(Forward);
+export { ForwardScreen };
 
 AppRegistry.registerComponent('ForwardScreen', () => ForwardScreen);

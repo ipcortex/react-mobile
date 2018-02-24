@@ -7,11 +7,12 @@ import {
   Text,
   View
 } from 'react-native';
+import { connect } from "react-redux";
 
 import { styles } from '../config/styles.js';
 
 
-export class HomeScreen extends React.Component {
+class Home extends React.Component {
   static logged_in = 0;
   static navigationOptions = {
     headerTitle: `${Platform.OS} App title`,
@@ -31,48 +32,16 @@ export class HomeScreen extends React.Component {
 
 
   }
-
-
-
-componentWillMount(){
-    const { navigate } = this.props.navigation;
-
-    if(!(this.state.logged_in++))
-      navigate('LoginModalNavigator');
-    console.log('**componentWillMount', this.state);
-}
-
-componentDidMount()
-{
-    console.log('**componentDidMount', this.state);
-}
-
-
-componentWillReceiveProps(props)
-{
-    console.log('**componentWillReceiveProps', props, this.state);
-}
-shouldComponentUpdate(nextprops, nextstate)
-{
-    console.log('**shouldComponentUpdate', nextprops, nextstate, this.state);
-}
-
-componentWillUpdate(nextprops, nextstate)
-{
-    console.log('**componentWillUpdate', nextprops, nextstate, this.state);
-}
-componentDidUpdate(nextprops, nextstate)
-{
-    console.log('**componentDidUpdate', nextprops, nextstate, this.state);
-}
-
-componentWillUnmount(){
-    console.log('**componentWillUnMount', this.state);
-}
-
+  navigate = () => {
+    const navigateHome = NavigationActions.navigate({
+      routeName: "Home",
+      params: { }
+    });
+    this.props.navigation.dispatch(navigateHome);
+  };
 
   render() {
-    const { navigate } = this.props.navigation;
+    
 
     return (
       <View>
@@ -89,5 +58,12 @@ componentWillUnmount(){
     );
   }
 }
+
+const mapDispatchToProps = {
+
+};
+
+const HomeScreen = connect(null, mapDispatchToProps)(Home);
+export { HomeScreen };
 
 AppRegistry.registerComponent('HomeScreen', () => HomeScreen);
