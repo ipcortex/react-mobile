@@ -29,13 +29,15 @@ class AppWithNavigationState extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     nav: PropTypes.object.isRequired,
+    getState: PropTypes.func.isRequired,
   };
 
   render() {
-    const { dispatch, nav } = this.props;
+    const { dispatch, nav, store } = this.props;
     return (
       <AppNavigator
         navigation={addNavigationHelpers({
+          getState,
           dispatch,
           state: nav,
           addListener,
