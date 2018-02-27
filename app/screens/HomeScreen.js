@@ -14,21 +14,21 @@ import { styles } from '../config/styles.js';
 class HomeScreen extends React.Component {
   static logged_in = 0;
   static navigationOptions = ( { navigation, screenProps } ) => {
-    return ( { headerTitle: `${ Platform.OS } App title`, headerRight: ( <Button onPress={() => screenProps.dispatch( { type: 'Logout' } )} title="Info" color="#000"/> ) } );
+    return ( {
+      headerTitle: `${ Platform.OS } App title`,
+      headerRight: ( <Button
+            onPress={() => screenProps.dispatch( { type: 'Logout' } )}
+            title="Logout"
+            color="#000"/> )
+    } );
   };
 
   constructor( props ) {
     super( props );
-    this.state = {
-      logged_in: 0,
-      id: Math.random()
-    };
-
+    if ( !props.screenProps.auth.isLoggedIn )
+      this.props.navigation.dispatch( { type: 'Logout' } );
   }
-  navigate = () => {
-    const navigateHome = NavigationActions.navigate( { routeName: "Home", params: {} } );
-    this.props.navigation.dispatch( navigateHome );
-  };
+
 
   render() {
 

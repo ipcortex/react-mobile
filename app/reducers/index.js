@@ -1,90 +1,18 @@
 import { combineReducers } from 'redux';
 import { NavigationActions } from 'react-navigation';
 
-import { AsyncStorage } from "react-native";
 import { persistReducer } from "redux-persist";
-import createSensitiveStorage from "redux-persist-sensitive-storage";
 
 import { AppNavigator } from '../navigation/AppNavigator';
 
-// Start with two routes: The Main screen, with the Login screen on top.
-const firstAction = AppNavigator.router.getActionForPathAndParams('Home');
-const tempNavState = AppNavigator.router.getStateForAction(firstAction);
-const secondAction = AppNavigator.router.getActionForPathAndParams('Login');
-const initialNavState = AppNavigator.router.getStateForAction(
-  secondAction,
-  tempNavState
-);
+import {mainPersistConfig, sensitivePersistConfig} from '../config/storage';
 
-function nav(state = initialNavState, action) {
-  let nextState;
-  switch(action.type) {
-  case 'Login':
-    nextState = AppNavigator.router.getStateForAction(
-      NavigationActions.back(),
-      state
-    );
-    break;
-  case 'Logout':
-    nextState = AppNavigator.router.getStateForAction(
-      NavigationActions.navigate({ routeName: 'Login' }),
-      state
-    );
-    break;
-  case 'Forward':
-    nextState = AppNavigator.router.getStateForAction(
-      NavigationActions.navigate({ routeName: 'Forward' }),
-      state
-    );
-    break;
-  case 'NightMode':
-    nextState = AppNavigator.router.getStateForAction(
-      NavigationActions.navigate({ routeName: 'NightMode' }),
-      state
-    );
-    break;
-  default:
-    nextState = AppNavigator.router.getStateForAction(action, state);
-    break;
-  }
-
-  // Simply return the original `state` if `nextState` is null or undefined.
-  return nextState || state;
-}
-
-const initialAuthState = { isLoggedIn: false };
-
-function auth(state = initialAuthState, action) {
-  switch(action.type) {
-  case 'Login':
-    return { ...state, isLoggedIn: true };
-  case 'Logout':
-    return { ...state, isLoggedIn: false };
-  default:
-    return state;
-  }
-}
-
-const sensitiveStorage = createSensitiveStorage({
-  keychainService: "myKeychain",
-  sharedPreferencesName: "IPCortex"
-});
-
-const mainPersistConfig = {
-  key: "main",
-  storage: AsyncStorage,
-  blacklist: ["someEphemeralKey"]
-};
-
-const sensitivePersistConfig = {
-  key: "auth",
-  storage: sensitiveStorage
-};
-
+import authReducer from './auth';
+import navReducer from './nav';
 
 const AppReducer = combineReducers({
-  nav: persistReducer(mainPersistConfig, nav),
-  auth: persistReducer(sensitivePersistConfig, auth),
+  nav: persistReducer(mainPersistConfig, navReducer),
+  auth: persistReducer(sensitivePersistConfig, authReducer),
 });
 
 export default AppReducer;

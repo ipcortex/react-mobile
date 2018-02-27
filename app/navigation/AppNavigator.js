@@ -10,9 +10,7 @@ import { NightModeScreen } from '../screens/NightModeScreen.js';
 import { addListener } from '../utils/redux';
 
 export const AppNavigator = StackNavigator( {
-  Login: {
-    screen: LoginScreen
-  },
+
   Home: {
     screen: HomeScreen
   },
@@ -21,7 +19,11 @@ export const AppNavigator = StackNavigator( {
   },
   NightMode: {
     screen: NightModeScreen
-  }
+},
+Login: {
+  screen: LoginScreen
+},
+
 } );
 
 class AppWithNavigationState extends React.Component {
@@ -31,10 +33,10 @@ class AppWithNavigationState extends React.Component {
   };
 
   render() {
-    const { dispatch, nav, getState } = this.props;
+    const { dispatch, nav, auth } = this.props;
     return ( <AppNavigator
         navigation={addNavigationHelpers( { dispatch, state: nav, addListener } )}
-        screenProps={{dispatch}}
+        screenProps={{dispatch, auth}}
     /> );
   }
 }
