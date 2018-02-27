@@ -1,21 +1,21 @@
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, Button, View } from 'react-native';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import { styles } from '../config/styles.js';
 
-export class LoginWidget extends Component {
+class LoginWidget extends Component {
 
   constructor( props ) {
     super( props );
-    this.state = {
-      forward: false
-    };
-  }
+    if(this.props.auth.isLoggedIn)
+        this.props.dispatch( { type: 'Login' } );
+}
 
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    //nav: PropTypes.object.isRequired
+    auth: PropTypes.object.isRequired
   };
 
 
@@ -30,3 +30,11 @@ export class LoginWidget extends Component {
     </View> );
   }
 }
+
+
+const mapStateToProps = state => ({
+  dispatch: state.dispatch,
+  auth: state.auth
+});
+
+export default connect(mapStateToProps)(LoginWidget);

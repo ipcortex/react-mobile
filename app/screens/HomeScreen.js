@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
-     AppRegistry,
-    Button,
+  AppRegistry,
+  Button,
   Platform,
   StyleSheet,
   Text,
@@ -11,55 +11,37 @@ import { connect } from "react-redux";
 
 import { styles } from '../config/styles.js';
 
-
 class HomeScreen extends React.Component {
   static logged_in = 0;
-  static navigationOptions = {
-    headerTitle: `${Platform.OS} App title`,
-    headerRight: (<Button
-        onPress={() => alert('This is a button!')}
-        title="Info"
-        color="#000"
-      />)
+  static navigationOptions = ( { navigation, screenProps } ) => {
+    return ( { headerTitle: `${ Platform.OS } App title`, headerRight: ( <Button onPress={() => screenProps.dispatch( { type: 'Logout' } )} title="Info" color="#000"/> ) } );
   };
 
-  constructor(props) {
-    super(props);
+  constructor( props ) {
+    super( props );
     this.state = {
       logged_in: 0,
       id: Math.random()
     };
 
-
   }
   navigate = () => {
-    const navigateHome = NavigationActions.navigate({
-      routeName: "Home",
-      params: { }
-    });
-    this.props.navigation.dispatch(navigateHome);
+    const navigateHome = NavigationActions.navigate( { routeName: "Home", params: {} } );
+    this.props.navigation.dispatch( navigateHome );
   };
 
   render() {
 
+    return ( <View>
 
-    return (
-      <View>
-
-        <Button
-          onPress={() => this.props.navigation.dispatch({ type: 'Forward' })}
-          title="Set forwards"
-        />
-        <Button
-          onPress={() => this.props.navigation.dispatch({ type: 'NightMode' })}
-          title="Manage Nightmodes"
-        />
-      </View>
-    );
+      <Button onPress={() => this.props.navigation.dispatch( { type: 'Forward' } )} title="Set forwards"/>
+      <Button onPress={() => this.props.navigation.dispatch( { type: 'NightMode' } )} title="Manage Nightmodes"/>
+    </View> );
   }
 }
 
+export {
+  HomeScreen
+};
 
-export { HomeScreen };
-
-AppRegistry.registerComponent('HomeScreen', () => HomeScreen);
+AppRegistry.registerComponent( 'HomeScreen', () => HomeScreen );

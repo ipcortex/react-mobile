@@ -1,6 +1,10 @@
 import { combineReducers } from 'redux';
 import { NavigationActions } from 'react-navigation';
 
+import { AsyncStorage } from "react-native";
+import { persistReducer } from "redux-persist";
+import createSensitiveStorage from "redux-persist-sensitive-storage";
+
 import { AppNavigator } from '../navigation/AppNavigator';
 
 // Start with two routes: The Main screen, with the Login screen on top.
@@ -48,7 +52,7 @@ function nav(state = initialNavState, action) {
   return nextState || state;
 }
 
-const initialAuthState = { isLoggedIn: true };
+const initialAuthState = { isLoggedIn: false };
 
 function auth(state = initialAuthState, action) {
   switch(action.type) {
@@ -61,9 +65,26 @@ function auth(state = initialAuthState, action) {
   }
 }
 
+const sensitiveStorage = createSensitiveStorage({
+  keychainService: "myKeychain",
+  sharedPreferencesName: "IPCortex"
+});
+
+const mainPersistConfig = {
+  key: "main",
+  storage: AsyncStorage,
+  blacklist: ["someEphemeralKey"]
+};
+
+const sensitivePersistConfig = {
+  key: "auth",
+  storage: sensitiveStorage
+};
+
+
 const AppReducer = combineReducers({
-  nav,
-  auth,
+  nav: persistReducer(mainPersistConfig, nav),
+  auth: persistReducer(sensitivePersistConfig, auth),
 });
 
 export default AppReducer;

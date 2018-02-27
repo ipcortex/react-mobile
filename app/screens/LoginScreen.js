@@ -12,7 +12,7 @@ import {
 
 import { styles } from '../config/styles.js';
 
-import { LoginWidget } from '../components/LoginWidget';
+import LoginWidget from '../components/LoginWidget';
 
 class LoginScreen extends React.Component {
 
