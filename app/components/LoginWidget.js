@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, Button, View } from 'react-native';
+import { Platform, StyleSheet, Text, TextInput, Button, View } from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
@@ -9,22 +9,39 @@ class LoginWidget extends Component {
 
   constructor( props ) {
     super( props );
-    if(this.props.auth.isLoggedIn)
+    if(this.props.isLoggedIn)
         this.props.dispatch( { type: 'Login' } );
+    this.state = {};
 }
 
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    auth: PropTypes.object.isRequired
+    isLoggedIn: PropTypes.bool.isRequired,
+    target: PropTypes.string.isRequired,
+    targetValid: PropTypes.bool.isRequired
   };
 
 
   render() {
+
     return ( <View style={styles.vsub}>
       <View style={styles.heading}>
-        <Text style={styles.h1}>Some Login Stuff</Text>
-      </View>
-      <View style={styles.fullcontrol}>
+        <Text style={styles.h1}>{this.props.target}</Text>
+          <Text>username</Text>
+          <TextInput
+          style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+          onChangeText={(username) => this.setState({username})}
+          value={this.state.username}
+        />
+
+          <Text>password</Text>
+              <TextInput
+              style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+              onChangeText={(password) => this.setState({password})}
+              value={this.state.password}
+              secureTextEntry={true}
+            />
+
         <Button onPress={() => this.props.dispatch( { type: 'Login' } )} title="Login"/>
       </View>
     </View> );
@@ -34,7 +51,9 @@ class LoginWidget extends Component {
 
 const mapStateToProps = state => ({
   dispatch: state.dispatch,
-  auth: state.auth
+  isLoggedIn: state.auth.isLoggedIn,
+  target: state.auth.target,
+  targetValid: state.auth.targetValid
 });
 
 export default connect(mapStateToProps)(LoginWidget);

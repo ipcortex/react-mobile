@@ -7,7 +7,9 @@ import {
   Text,
   View
 } from 'react-native';
-import { connect } from "react-redux";
+
+
+import HomeStatus from '../components/HomeStatus';
 
 import { styles } from '../config/styles.js';
 
@@ -23,19 +25,11 @@ class HomeScreen extends React.Component {
     } );
   };
 
-  constructor( props ) {
-    super( props );
-    if ( !props.screenProps.auth.isLoggedIn )
-      this.props.navigation.dispatch( { type: 'Logout' } );
-  }
-
 
   render() {
 
     return ( <View>
-
-      <Button onPress={() => this.props.navigation.dispatch( { type: 'Forward' } )} title="Set forwards"/>
-      <Button onPress={() => this.props.navigation.dispatch( { type: 'NightMode' } )} title="Manage Nightmodes"/>
+        <HomeStatus />
     </View> );
   }
 }
