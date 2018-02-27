@@ -6,7 +6,7 @@ import {styles} from '../config/styles.js';
 
 import {NightModeState} from '../components/NightMode';
 
-class NightMode extends Component {
+class NightModeScreen extends Component {
   static navigationOptions = {
     title: 'Night Modes'
   };
@@ -34,11 +34,7 @@ class NightMode extends Component {
   }
 }
 
-const mapDispatchToProps = {
-  NightMode
-};
 
-const NightModeScreen = connect(null, mapDispatchToProps)(NightMode);
 export { NightModeScreen };
 
 AppRegistry.registerComponent('NightModeScreen', () => NightModeScreen);

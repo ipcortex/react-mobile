@@ -13,7 +13,7 @@ import { styles } from '../config/styles.js';
 import { PhoneNumber } from '../components/PhoneNumber';
 import { ForwardState } from '../components/ForwardState';
 
-class Forward extends Component {
+export class ForwardScreen extends Component {
   static navigationOptions = {
     title: 'Call Forwards'
   };
@@ -28,12 +28,5 @@ class Forward extends Component {
 
   }
 }
-
-const mapDispatchToProps = {
-
-};
-
-const ForwardScreen = connect(null, mapDispatchToProps)(Forward);
-export { ForwardScreen };
 
 AppRegistry.registerComponent('ForwardScreen', () => ForwardScreen);

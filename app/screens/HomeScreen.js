@@ -12,7 +12,7 @@ import { connect } from "react-redux";
 import { styles } from '../config/styles.js';
 
 
-class Home extends React.Component {
+class HomeScreen extends React.Component {
   static logged_in = 0;
   static navigationOptions = {
     headerTitle: `${Platform.OS} App title`,
@@ -41,17 +41,17 @@ class Home extends React.Component {
   };
 
   render() {
-    
+
 
     return (
       <View>
 
         <Button
-          onPress={() => navigate('Forward')}
+          onPress={() => this.props.navigation.dispatch({ type: 'Forward' })}
           title="Set forwards"
         />
         <Button
-          onPress={() => navigate('NightMode')}
+          onPress={() => this.props.navigation.dispatch({ type: 'NightMode' })}
           title="Manage Nightmodes"
         />
       </View>
@@ -59,11 +59,7 @@ class Home extends React.Component {
   }
 }
 
-const mapDispatchToProps = {
 
-};
-
-const HomeScreen = connect(null, mapDispatchToProps)(Home);
 export { HomeScreen };
 
 AppRegistry.registerComponent('HomeScreen', () => HomeScreen);

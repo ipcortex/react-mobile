@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 
 import {
   AppRegistry,
@@ -8,12 +9,13 @@ import {
   Text,
   View
 } from 'react-native';
-import { connect } from "react-redux";
-import { login } from "../actions/actionCreator";
 
 import {styles} from '../config/styles.js';
 
 class LoginScreen extends React.Component {
+
+
+
   static navigationOptions = {
     title: `${Platform.OS} App Login`
   };
@@ -24,14 +26,12 @@ class LoginScreen extends React.Component {
 
 
   render() {
-    const {navigate} = this.props.navigation;
     return (<View>
-
-      <Button onPress={this.props.login} title="Login"/>
+        <LoginWidget />
     </View>);
   }
 }
 
 AppRegistry.registerComponent('LoginScreen', () => LoginScreen);
 
-export default LoginScreen;
+export { LoginScreen };

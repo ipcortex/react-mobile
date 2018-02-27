@@ -3,15 +3,13 @@ import {AppRegistry, Platform, StyleSheet, Text, View} from 'react-native';
 
 
 import { Provider } from "react-redux";
-import { createStore, applyMiddleware } from 'redux';
+import { compose, createStore, applyMiddleware } from 'redux';
 
 import AppReducer from './reducers';
 import AppWithNavigationState from './navigation/AppNavigator';
 import { middleware } from './utils/redux';
 
 import {styles} from './config/styles.js';
-import AppNavigation from "./navigation";
-import configureStore from "./config/store";
 
 const store = createStore(
   AppReducer,
