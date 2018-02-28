@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
 import {AppRegistry, Platform, StyleSheet, Text, View} from 'react-native';
+import { connect } from "react-redux";
 
 import {styles} from '../config/styles.js';
 
 import {NightModeState} from '../components/NightMode';
 
-export class NightModeScreen extends Component {
+class NightModeScreen extends Component {
   static navigationOptions = {
     title: 'Night Modes'
   };
@@ -32,5 +33,8 @@ export class NightModeScreen extends Component {
 
   }
 }
+
+
+export { NightModeScreen };
 
 AppRegistry.registerComponent('NightModeScreen', () => NightModeScreen);

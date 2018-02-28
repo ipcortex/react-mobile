@@ -6,6 +6,7 @@ import {
   Text,
   View
 } from 'react-native';
+import { connect } from "react-redux";
 
 import { styles } from '../config/styles.js';
 

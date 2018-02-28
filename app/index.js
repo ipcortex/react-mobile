@@ -1,55 +1,37 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, {Component} from 'react';
 import {AppRegistry, Platform, StyleSheet, Text, View} from 'react-native';
 
-import {StackNavigator} from 'react-navigation';
+
+import { Provider } from "react-redux";
+import { compose, createStore, applyMiddleware } from 'redux';
+import { persistStore } from 'redux-persist'
+import { PersistGate } from 'redux-persist/integration/react'
+
+import AppReducer from './reducers';
+import AppWithNavigationState from './navigation/AppNavigator';
+import { middleware } from './utils/redux';
 
 import {styles} from './config/styles.js';
 
-import {LoginScreen} from './screens/LoginScreen.js';
-import {HomeScreen} from './screens/HomeScreen.js';
-import {ForwardScreen} from './screens/ForwardScreen.js';
-import {NightModeScreen} from './screens/NightModeScreen.js';
-
-
-
-const AuthStackNavigator = StackNavigator({Login: LoginScreen});
-
-const MainStackNavigator = StackNavigator({
-  Home: {
-    screen: HomeScreen
-  },
-  Forward: {
-    screen: ForwardScreen
-  },
-  NightMode: {
-    screen: NightModeScreen
-  }
-});
-
-const IPCMobile = StackNavigator(
-  {
-    MainStackNavigator: {
-      screen: MainStackNavigator
-    },
-    LoginModalNavigator: {
-      screen: AuthStackNavigator
-    }
-  }, {
-    headerMode: 'none',
-    mode: 'modal'
-  }
+const store = createStore(
+  AppReducer,
+  applyMiddleware(middleware),
 );
+const persistor = persistStore(store)
 
-export default class App extends Component {
+
+
+export default class IPCMobile extends Component {
   render() {
-    return (<IPCMobile/>);
-  }
+      return (
+          <Provider store={store}>
+              <PersistGate loading={null} persistor={persistor}>
+            <AppWithNavigationState />
+            </PersistGate>
+          </Provider>
+        );
+    }
+
 }
 
 AppRegistry.registerComponent('IPCMobile', () => IPCMobile);
