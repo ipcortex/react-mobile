@@ -4,13 +4,14 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import { styles } from '../config/styles.js';
+import { actions } from '../reducers';
 
 class LoginWidget extends Component {
 
   constructor( props ) {
     super( props );
     if(this.props.isLoggedIn)
-        this.props.dispatch( { type: 'Login' } );
+        this.props.dispatch( actions.Login );
     this.state = {};
 }
 
@@ -42,7 +43,8 @@ class LoginWidget extends Component {
               secureTextEntry={true}
             />
 
-        <Button onPress={() => this.props.dispatch( { type: 'Login' } )} title="Login"/>
+
+        <Button onPress={() => this.props.dispatch( actions.Login )} title="Login"/>
       </View>
     </View> );
   }

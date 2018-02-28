@@ -5,6 +5,7 @@ import { NavigationActions } from 'react-navigation';
 import PropTypes from 'prop-types';
 
 import { styles } from '../config/styles.js';
+import { actions } from '../reducers';
 
 class HomeStatus extends Component {
 
@@ -29,8 +30,8 @@ class HomeStatus extends Component {
         </View>)
         else
             return(<View>
-        <Button onPress={() => this.props.dispatch( { type: 'Forward' } )} title="Set forwards"/>
-          <Button onPress={() => this.props.dispatch( { type: 'NightMode' } )} title="Manage Nightmodes"/>
+        <Button onPress={() => this.props.dispatch( actions.Forward )} title="Set forwards"/>
+          <Button onPress={() => this.props.dispatch( actions.NightMode )} title="Manage Nightmodes"/>
       </View>);
 
     }
@@ -43,7 +44,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     dispatch,
-    logout: () => dispatch({ type: 'Logout' }),
+    logout: () => dispatch(actions.Logout),
     loginScreen: () =>
         dispatch(NavigationActions.navigate({ routeName: 'Login' })),
 });
