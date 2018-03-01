@@ -5,9 +5,10 @@ const initialAuthState = { isLoggedIn: false, target: 'pabx1.ipcortex.net', targ
 export const actions = {
     Login: { type: 'LOGIN' },
     Logout: { type: 'LOGOUT' },
-    setTarget: { type: 'AUTH_SETTARGET' },
+    setTarget:  { hostname: (text) => ({type: 'AUTH_SETTARGET', hostname: text })},
     invalidateTarget: { type: 'AUTH_INVALIDATETARGET' },
     validateTarget: { type: 'AUTH_VALIDATETARGET' },
+    setLoginToken:  { token: (text) => ({type: 'AUTH_SETLOGINTOKEN', token: text })},
 }
 
 export default (state = initialAuthState, action) => {
@@ -21,7 +22,10 @@ export default (state = initialAuthState, action) => {
   case actions.invalidateTarget.type:
       return { ...state, targetValid: false };
   case actions.validateTarget.type:
-  return { ...state, targetValid: true };
+    return { ...state, targetValid: true };
+  case actions.setLoginToken.type:
+    return { ...state, loginToken: action.token };
+
 
 
 

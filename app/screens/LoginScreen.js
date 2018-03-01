@@ -25,7 +25,7 @@ class LoginScreen extends React.Component {
   };
 
   render() {
-    return ( <View>
+    return ( <View style={styles.container}>
       <LoginWidget dispatch = {this.props.navigation.dispatch}/>
     </View> );
   }
