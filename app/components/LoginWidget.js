@@ -8,7 +8,11 @@ import { actions } from '../reducers';
 
 import { IPCortexAPI } from './IPCortexAPI';
 
-
+/**
+ * Input a domain name with validation and format hints
+ *
+ * @extends Component
+ */
 class InputDomainName extends Component {
     constructor(props) {
         super(props);
@@ -56,6 +60,11 @@ class InputDomainName extends Component {
 
 }
 
+/**
+ * React component to handle sopecifiying a PBX and logging in an API instance
+ *
+ * @extends Component
+ */
 class LoginWidget extends Component {
 
     constructor(props) {
