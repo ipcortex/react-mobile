@@ -3,6 +3,9 @@ import { Platform, StyleSheet, Text, TextInput, Button, View } from 'react-nativ
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
+
+
+
 import { styles } from '../config/styles.js';
 import { actions } from '../reducers';
 
@@ -61,16 +64,35 @@ class InputDomainName extends Component {
 }
 
 /**
- * React component to handle sopecifiying a PBX and logging in an API instance
+ * React component to handle specifiying a PBX and logging in an API instance
  *
  * @extends Component
  */
 class LoginWidget extends Component {
 
+    // We expect to get these state variables as props
+    static propTypes = {
+        dispatch: PropTypes.func.isRequired,
+        isLoggedIn: PropTypes.bool.isRequired,
+        loginError: PropTypes.string,
+        loginToken: PropTypes.object,
+        target: PropTypes.string.isRequired,
+        targetValid: PropTypes.bool.isRequired,
+    };
+
+    /**
+     * Creates a instance with props
+     *
+     * @method constructor
+     * @param  {object}    props React props
+     */
     constructor(props) {
         super(props);
         this.state = {};
         this.IPCortex = new IPCortexAPI();
+        // If we have a hostname then initialise (load the API) from it
+        // If we also have a previous login toekn then giv it a try as soon as
+        // the API initialises
         if(props.target != '')
             this.IPCortex.setServer(props.target)
             .then((hostname) => {
@@ -84,14 +106,13 @@ class LoginWidget extends Component {
             })
 
     }
-
-    static propTypes = {
-        dispatch: PropTypes.func.isRequired,
-        isLoggedIn: PropTypes.bool.isRequired,
-        target: PropTypes.string.isRequired,
-        targetValid: PropTypes.bool.isRequired
-    };
-
+    /**
+     * Render inline tags to output confirmation of current login server (if API is valid),
+     * or input a new one if we don't have one yet.
+     *
+     * @method input_server
+     * @return {ReactTags}    JSX fragment to use in upstream render
+     */
     input_server() {
         if(this.props.targetValid) {
             return(<View style={styles.hsubThin}>
@@ -119,7 +140,15 @@ class LoginWidget extends Component {
       </View>)
         }
     }
-
+    /**
+     * User login to an instance of the API. Async, returns immediately and caller never
+     * finds out any more. Ultimately dispatches a 'Login' or 'loginError' state change
+     * action on the UI.
+     *
+     * @method do_login
+     * @param  {Object} credentials eiher {username: 'username', password: 'password' }, or {token:}
+     *
+     */
     do_login(credentials) {
         try {
             this.IPCortex.PBX.Auth.setHost(`https://${this.props.target}`);
@@ -131,11 +160,12 @@ class LoginWidget extends Component {
                 .then(res => {
                     this.props.dispatch(actions.Login);
                 })
-                .catch(err => {
-                    foo(res);
-                })
-        } catch(err) {
+                .catch((err) => {
+                    this.props.dispatch(actions.loginError.message(err.toString()));
+                });
 
+        } catch(err) {
+            this.props.dispatch(actions.loginError.message(err.toString()));
         }
 
 
@@ -151,6 +181,7 @@ class LoginWidget extends Component {
                 style={{height: 40, borderColor: 'gray', borderWidth: 1}}
                 onChangeText={(username) => this.setState({username})}
                 value={this.state.username}
+                autoCapitalize={'none'}
                 placeholder={'Username'}
               /></View>
           <View style={{flex:0.1}}/>
@@ -175,7 +206,7 @@ class LoginWidget extends Component {
                   onPress={() => this.do_login({username: this.state.username, password: this.state.password})}
                   title="Login"/>
               </View>
-
+            <Text>{this.props.loginError}</Text>
             </View>
 
             );
@@ -200,8 +231,10 @@ class LoginWidget extends Component {
 const mapStateToProps = state => ({
     dispatch: state.dispatch,
     isLoggedIn: state.auth.isLoggedIn,
+    loginError: state.loginError,
+    loginToken: state.auth.loginToken,
     target: state.auth.target,
-    targetValid: state.auth.targetValid
+    targetValid: state.auth.targetValid,
 });
 
 export default connect(mapStateToProps)(LoginWidget);
