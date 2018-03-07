@@ -5,11 +5,11 @@ const initialAuthState = { isLoggedIn: false, targetValid: false };
 export const actions = {
     Login: { type: 'LOGIN' },
     Logout: { type: 'LOGOUT' },
-    setTarget:  { hostname: (text) => ({type: 'AUTH_SETTARGET', hostname: text })},
+    setTarget:  { type: 'AUTH_SETTARGET', hostname: (text) => ({type: 'AUTH_SETTARGET', hostname: text })},
     invalidateTarget: { type: 'AUTH_INVALIDATETARGET' },
     validateTarget: { type: 'AUTH_VALIDATETARGET' },
-    setLoginToken:  { token: (text) => ({type: 'AUTH_SETLOGINTOKEN', token: text })},
-    loginError:  { message: (text) => ({type: 'AUTH_LOGINERROR', loginError: text })}
+    setLoginToken:  { type: 'AUTH_SETLOGINTOKEN', token: (text) => ({type: 'AUTH_SETLOGINTOKEN', token: text })},
+    loginError:  { type: 'AUTH_LOGINERROR', message: (text) => ({type: 'AUTH_LOGINERROR', loginError: text })}
 }
 
 export default (state = initialAuthState, action) => {

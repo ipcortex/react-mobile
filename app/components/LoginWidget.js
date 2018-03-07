@@ -27,7 +27,7 @@ class InputDomainName extends Component {
         return(<TextInput
                 value={this.state.value}
                 onChangeText={(text) => this.validateStyle(text, false)}
-                onSubmitEditing={(event) => this.submit(event)}
+                onSubmitEditing={(event) => this.submit()}
                 returnKeyType={'done'}
                 style = {this.state.style}
             />)
@@ -50,9 +50,7 @@ class InputDomainName extends Component {
             this.setState({ style: styles[this.state.baseStyle + 'Warning'] });
         else if(!valid && final && styles[this.state.baseStyle + 'Error'])
             this.setState({ style: styles[this.state.baseStyle + 'Error'] });
-
         return(valid);
-
     }
 
     submit() {
@@ -93,17 +91,21 @@ class LoginWidget extends Component {
         // If we have a hostname then initialise (load the API) from it
         // If we also have a previous login toekn then giv it a try as soon as
         // the API initialises
-        if(props.target != '')
+        if(props.target && props.target != '')
             this.IPCortex.setServer(props.target)
             .then((hostname) => {
-                this.props.dispatch(actions.validateTarget)
+                this.props.dispatch(actions.setTarget(hostname));
+                this.props.dispatch(actions.validateTarget);
                 if(this.props.loginToken)
-                    this.do_login({token: loginToken});
+                    this.do_login({ token: loginToken });
             })
             .catch((err) => {
                 this.props.dispatch(actions.invalidateTarget);
                 this.setState({ apiError: err.toString() });
             })
+        else {
+            this.props.dispatch(actions.invalidateTarget);
+        }
 
     }
     /**
@@ -125,7 +127,7 @@ class LoginWidget extends Component {
           <InputDomainName
               value={this.props.target}
               onSubmit={(text) => {
-                                this.props.dispatch( actions.setTarget.hostname(text) )
+                                this.props.dispatch( actions.setTarget.hostname(text) );
                                 if(text != '')
                                     this.IPCortex.setServer(text)
                                     .then((hostname) => this.props.dispatch(actions.validateTarget))
@@ -215,7 +217,7 @@ class LoginWidget extends Component {
 
 
     render() {
-
+console.log('render: props: ', this.props, this);
         return(<View style={styles.vsub}>
             <View style={styles.vsubThin}>{this.input_server()}</View>
         <View style={styles.vsub}>{(this.props.targetValid)?this.input_login():

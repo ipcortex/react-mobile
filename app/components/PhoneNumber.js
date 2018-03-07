@@ -12,7 +12,7 @@ import {
 import { styles } from '../config/styles.js';
 
 
-export class PhoneNumber extends Component {
+export default class PhoneNumber extends Component {
   constructor(props) {
     super(props);
     this.state = {
