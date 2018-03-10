@@ -1,6 +1,9 @@
 import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
+  button: {
+      marginHorizontal: 8
+  },
   container: {
     flex: 1,
     alignItems: 'stretch',

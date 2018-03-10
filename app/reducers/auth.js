@@ -9,7 +9,7 @@ export const actions = {
     invalidateTarget: { type: 'AUTH_INVALIDATETARGET' },
     validateTarget: { type: 'AUTH_VALIDATETARGET' },
     setLoginToken:  { type: 'AUTH_SETLOGINTOKEN', token: (text) => ({type: 'AUTH_SETLOGINTOKEN', token: text })},
-    loginError:  { type: 'AUTH_LOGINERROR', message: (text) => ({type: 'AUTH_LOGINERROR', loginError: text })}
+    loginError:  { type: 'AUTH_LOGINERROR', message: (text) => ({type: 'AUTH_LOGINERROR', messagerob: text })}
 }
 
 export default (state = initialAuthState, action) => {

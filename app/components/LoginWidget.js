@@ -88,16 +88,20 @@ class LoginWidget extends Component {
         super(props);
         this.state = {};
         this.IPCortex = new IPCortexAPI();
+
+
+    }
+    componentDidMount(){
         // If we have a hostname then initialise (load the API) from it
         // If we also have a previous login toekn then giv it a try as soon as
         // the API initialises
-        if(props.target && props.target != '')
-            this.IPCortex.setServer(props.target)
+        if(this.props.target && this.props.target != '')
+            this.IPCortex.setServer(this.props.target)
             .then((hostname) => {
-                this.props.dispatch(actions.setTarget(hostname));
+                this.props.dispatch(actions.setTarget.hostname(hostname));
                 this.props.dispatch(actions.validateTarget);
                 if(this.props.loginToken)
-                    this.do_login({ token: loginToken });
+                    this.do_login({ token: this.props.loginToken });
             })
             .catch((err) => {
                 this.props.dispatch(actions.invalidateTarget);
@@ -106,7 +110,6 @@ class LoginWidget extends Component {
         else {
             this.props.dispatch(actions.invalidateTarget);
         }
-
     }
     /**
      * Render inline tags to output confirmation of current login server (if API is valid),
@@ -161,13 +164,17 @@ class LoginWidget extends Component {
                 }, credentials))
                 .then(res => {
                     this.props.dispatch(actions.Login);
-                })
-                .catch((err) => {
+                    return "OK";
+                }, (err) => {
+                    this.props.dispatch(actions.Logout);
                     this.props.dispatch(actions.loginError.message(err.toString()));
+                    return "fail";
                 });
-
+            return;
         } catch(err) {
+            this.props.dispatch(actions.Logout);
             this.props.dispatch(actions.loginError.message(err.toString()));
+            return "fail";
         }
 
 

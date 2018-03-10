@@ -22,9 +22,8 @@ class PhoneScreen extends React.Component {
 
 
   render() {
-    return ( <View>
+    return ( <View style={styles.container}>
         <Phone />
-
     </View> );
   }
 }
