@@ -91,7 +91,7 @@ class LoginWidget extends Component {
 
 
     }
-    componentDidMount(){
+    componentDidMount() {
         // If we have a hostname then initialise (load the API) from it
         // If we also have a previous login toekn then giv it a try as soon as
         // the API initialises
@@ -100,14 +100,19 @@ class LoginWidget extends Component {
             .then((hostname) => {
                 this.props.dispatch(actions.setTarget.hostname(hostname));
                 this.props.dispatch(actions.validateTarget);
-                if(this.props.loginToken)
-                    this.do_login({ token: this.props.loginToken });
+                if(typeof this.props.loginToken === 'object')
+                    this.do_login({ token: this.props.loginToken }); // need to wait for this promise before we try to init again
             })
             .catch((err) => {
+
+                this.props.dispatch(actions.setLoginToken.token(null));
                 this.props.dispatch(actions.invalidateTarget);
                 this.setState({ apiError: err.toString() });
             })
         else {
+
+            this.props.dispatch(actions.setLoginToken.token(null));
+            this.props.dispatch(actions.invalidateTarget);
             this.props.dispatch(actions.invalidateTarget);
         }
     }
@@ -224,7 +229,7 @@ class LoginWidget extends Component {
 
 
     render() {
-console.log('render: props: ', this.props, this);
+        console.log('render: props: ', this.props, this);
         return(<View style={styles.vsub}>
             <View style={styles.vsubThin}>{this.input_server()}</View>
         <View style={styles.vsub}>{(this.props.targetValid)?this.input_login():

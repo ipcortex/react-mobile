@@ -4,8 +4,18 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { connect } from 'react-redux';
 import { NavigationActions } from 'react-navigation';
 import PropTypes from 'prop-types';
-import Swipeable from 'react-native-swipeout';
 
+import {
+    IPCortexAPI,
+    IPCortex,
+    RTCPeerConnection,
+    RTCIceCandidate,
+    RTCSessionDescription,
+    RTCView,
+    MediaStream,
+    MediaStreamTrack,
+    getUserMedia
+} from './IPCortexAPI';
 
 
 import PhoneNumber from '../components/PhoneNumber';
@@ -24,94 +34,82 @@ Object.assign(styles, {
     }
 })
 
+
+
 class PhoneButton extends Component {
 
-    swipebutton(type, name, onLeft, onRight) {
-        const leftContent = '';
-
-
-
-        return(
-            <Swipeable>
-                <Icon
-                        color="white"
-                        size={50}
-                        style={styles[type+'Button']}
-                        name={name}/><Text>hello</Text>
-            </Swipeable>
-        );
-
-    }
 
     render() {
-        var onPress = () => {};
-        var name = 'phone';
-        var type = 'up'
-        var onRight, onLeft = () => {};
+
 
         switch(`${this.props.callState}`) {
             case 'up':
-                type = "down";
-                name = "phone-hangup";
-                onPress = this.props.onHangup;
+                buttons = [this.props.haveNumber && {
+                    type: "down",
+                    name: "phone-hangup",
+                    text: 'Hangup',
+                    onPress: this.props.onHangup
+                }]
                 break;
             case 'down':
-                disabled = "up";
-                name = "phone-outgoing";
-                onPress = this.props.onDial;
+                buttons = [{
+                    type: "up",
+                    name: "phone-outgoing",
+                    text: 'Call',
+                    onPress: this.props.onDial
+
+                }]
                 break;
             case 'ringing-in':
-                type = "slider";
-                name = 'phone-incoming';
-                onRight = this.props.onAccept;
-                onLeft = this.props.onHangup;
+                buttons = [{
+                        type: "up",
+                        name: 'phone-incoming',
+                        text: 'Answer',
+                        onPress: this.props.onAccept
+
+                    },
+                    {
+                        type: "down",
+                        name: 'phone-hangup',
+                        text: 'Reject',
+                        onPress: this.props.onHangup
+
+                    }
+                ];
                 break;
             case 'ringing-out':
-                type = "down";
-                name = 'phone-hangup';
-                onPress = this.props.onHangup;
+                buttons = [{
+                    type: "down",
+                    name: 'phone-hangup',
+                    text: 'Cancel',
+                    onPress: this.props.onHangup
+
+                }]
                 break;
             default:
-                type = "down";
-                name = "phone-settings";
-                break;
+                buttons = [{
+                    type: "down",
+                    text: "Shouldnt happen",
+                    name: "phone-settings"
+
+                }]
         }
 
-        const rightButtons = [
-            { component: <Icon
-                    color="white"
-                    size={50}
-                    style={styles['downButton']}
-                    name='phone-hangup'
-                    onPress={onLeft}/> }
-        ];
-        const leftButtons = [
-            { component: <Icon
-                style={{width:50}}
-                    color="white"
-                    size={50}
-                    style={styles['upButton']}
-                    name='phone-incoming'
-                    onPress={onRight}/> }
-        ];
-        if(type != 'slider')
-            return(<Icon.Button
-                style={{width:50}}
-                    color="white"
-                    size={50}
-                    style={styles[type+'Button']}
-                    name={name}
-                    onPress={onPress}/>);
-        else
-            return(<Swipeable style={{width: 300}} buttonWidth={50} left={leftButtons} right={rightButtons}>
-                <View style={styles.hsub}></View>
-                <Icon style={{width:50}}
-                        color="white"
-                        size={50}
-                        name="phone-incoming"
-                        onPress={onLeft}/><Text>Call from fred</Text>
 
-            </Swipeable>)
+
+        return(<View style={styles.hspaced}>
+                {buttons.map((button) => (<Icon.Button
+                    key={button.type}
+                    color="white"
+                    backgroundColor = "transparent"
+                    size={50}
+                    style={styles[button.type+'Button']}
+                    name={button.name}
+                    onPress={button.onPress}>{button.text}</Icon.Button>
+                    ))}
+                </View>)
+
+
 
 
 
@@ -124,29 +122,47 @@ class Phone extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { callState: 'ringing-in' }
+        this.state = { callState: 'down', videoURL: null, dialNumber: '' };
 
-        setInterval(() => {
-            let transitions = {
-                up: 'down',
-                down: 'ringing-in',
-                'ringing-in': 'down',
-                'ringing-out': 'up'
-            };
-            this.setState({ callState: transitions[this.state.callState] });
-        }, 8000);
+        if(IPCortex.PBX) {
+            this.myPhone = IPCortex.PBX.owned[0];
+            /* Assume the phone is a keevio phone and enable it for WebRTC */
+            this.myPhone.enableRTC();
+            /* Wait for new call events to arrive */
+            this.myPhone.addListener('update', function(device) {
+                /* If there are multiple calls, ignore all except the first */
+                if(device.calls.length > 0) {
 
+                    /* If the call is up and has media, attach it to the video tag */
+                    if(device.calls[0].remoteMedia && device.calls[0].state !== 'dead')
+                        attachMediaStream(videoTag, device.calls[0].remoteMedia[0]);
+                }
+            });
+        }
+        /*
+                setInterval(() => {
+                    let transitions = {
+                        up: 'down',
+                        down: 'ringing-in',
+                        'ringing-in': 'down',
+                        'ringing-out': 'up'
+                    };
+                    this.setState({ callState: transitions[this.state.callState] });
+                }, 8000);
+        */
     }
 
     render() {
         return(<View style={styles.container}>
-        <PhoneNumber title="Phone" icon="phone"/>
+
+        <PhoneNumber title="Phone" icon="phone" onChange={(number) => {this.setState({dialNumber: number})}}/>
         <Text>Call State is {this.state.callState}</Text>
-            <View style={styles.hsub}>
-                        <View style={styles.button}>
+
                             <PhoneButton
-                                 callState={this.state.callState}
+                                haveNumber={this.state.dialNumber && this.state.dialNumber.length}
+                                callState={this.state.callState}
                                 onDial={() => {
+                                    this.myPhone.dial()
                                     this.setState({callState: 'ringing-out'});
 
                                 }}
@@ -157,8 +173,8 @@ class Phone extends Component {
                                     this.setState({callState: 'down'});
                                 }}
                             />
-                        </View>
-                    </View>
+    <RTCView streamURL={this.state.videoURL}/>
+
     </View>)
     }
 }

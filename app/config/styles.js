@@ -22,6 +22,12 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     justifyContent: 'center'
   },
+  hspaced: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around'
+  },
   hsubThin: {
     flex: 0.2,
     flexDirection: 'row',

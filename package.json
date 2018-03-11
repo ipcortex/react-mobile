@@ -18,6 +18,8 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-native": "^0.53.0",
+    "react-native-drag-drop": "https://github.com/deanmcpherson/react-native-drag-drop.git",
+    "react-native-draggable-holder": "https://github.com/btk/react-native-draggable-holder.git",
     "react-native-material-ui": "^1.20.0",
     "react-native-modal-selector": "^0.0.24",
     "react-native-sensitive-info": "^5.1.0",
