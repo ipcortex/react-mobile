@@ -89,32 +89,41 @@ class LoginWidget extends Component {
         this.state = {};
         this.IPCortex = new IPCortexAPI();
 
+        // If we are a bit out of sync (just restarted and have old state
+        // from redux rehydrate) then force an API reload if we have no API
+        // but think we have
+        if(this.props.target &&
+            this.props.target != '' &&
+            !this.IPCortex.isLoaded) {
+            this.props.dispatch(actions.invalidateTarget)
+            this.IPCortex.setServer(this.props.target)
+                .then((hostname) => {
+                    this.props.dispatch(actions.validateTarget)
+                })
+                .catch((err) => {
+                    this.setState({ apiError: err.toString() });
+                });
+        }
+
 
     }
+
+
+    // Called by react just after we are initialised
     componentDidMount() {
-        // If we have a hostname then initialise (load the API) from it
-        // If we also have a previous login toekn then giv it a try as soon as
-        // the API initialises
-        if(this.props.target && this.props.target != '')
-            this.IPCortex.setServer(this.props.target)
-            .then((hostname) => {
-                this.props.dispatch(actions.setTarget.hostname(hostname));
-                this.props.dispatch(actions.validateTarget);
-                if(typeof this.props.loginToken === 'object')
-                    this.do_login({ token: this.props.loginToken }); // need to wait for this promise before we try to init again
-            })
-            .catch((err) => {
+        console.log('didMount???');
+    }
 
-                this.props.dispatch(actions.setLoginToken.token(null));
-                this.props.dispatch(actions.invalidateTarget);
-                this.setState({ apiError: err.toString() });
-            })
-        else {
-
-            this.props.dispatch(actions.setLoginToken.token(null));
-            this.props.dispatch(actions.invalidateTarget);
-            this.props.dispatch(actions.invalidateTarget);
-        }
+    // Called by react when props are about to change
+    componentWillReceiveProps(newProps, newState) {
+        // If the API just initialised and we have a previous login token then give it a try
+        if(newProps.targetValid === true && this.props.targetValid === false)
+            if(typeof newProps.loginToken === 'object')
+                this.do_login({ token: this.props.loginToken })
+                .then((status) => console.log(status))
+                .catch((err) => {
+                    this.props.dispatch(actions.setLoginToken.token(null));
+                });
     }
     /**
      * Render inline tags to output confirmation of current login server (if API is valid),
@@ -159,30 +168,25 @@ class LoginWidget extends Component {
      * @param  {Object} credentials eiher {username: 'username', password: 'password' }, or {token:}
      *
      */
-    do_login(credentials) {
+    async do_login(credentials) {
         try {
             this.IPCortex.PBX.Auth.setHost(`https://${this.props.target}`);
-            this.IPCortex.PBX.Auth.login(Object.assign({
+            await this.IPCortex.PBX.Auth.login(Object.assign({
                     notoken: false,
                     nodom: true,
                     tokenCB: (token) => this.props.dispatch(actions.setLoginToken.token(token))
-                }, credentials))
-                .then(res => {
-                    this.props.dispatch(actions.Login);
-                    return "OK";
-                }, (err) => {
-                    this.props.dispatch(actions.Logout);
-                    this.props.dispatch(actions.loginError.message(err.toString()));
-                    return "fail";
-                });
-            return;
+                }, credentials));
+            await this.IPCortex.PBX.startFeed({
+                            device: true,
+                            deviceMin: true
+                        });
+            this.props.dispatch(actions.Login);
+            return "OK";
+
         } catch(err) {
-            this.props.dispatch(actions.Logout);
             this.props.dispatch(actions.loginError.message(err.toString()));
-            return "fail";
+            throw "login fail";
         }
-
-
     }
 
     input_login() {

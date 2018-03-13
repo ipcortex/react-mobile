@@ -11,7 +11,7 @@ import authReducer, { actions as authActions } from './auth';
 import navReducer, { actions as navActions } from './nav';
 
 const AppReducer = combineReducers({
-  nav: persistReducer(mainPersistConfig, navReducer),
+  nav: navReducer,
   auth: persistReducer(sensitivePersistConfig, authReducer),
 });
 

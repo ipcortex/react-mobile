@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 
 import {
     IPCortexAPI,
-    IPCortex,
     RTCPeerConnection,
     RTCIceCandidate,
     RTCSessionDescription,
@@ -18,10 +17,13 @@ import {
 } from './IPCortexAPI';
 
 
+
 import PhoneNumber from '../components/PhoneNumber';
 
 import { styles } from '../config/styles.js';
 import { actions } from '../reducers';
+
+var JsSIP, IPCortex;
 
 Object.assign(styles, {
     upButton: {
@@ -123,22 +125,11 @@ class Phone extends Component {
     constructor(props) {
         super(props);
         this.state = { callState: 'down', videoURL: null, dialNumber: '' };
-
-        if(IPCortex.PBX) {
-            this.myPhone = IPCortex.PBX.owned[0];
-            /* Assume the phone is a keevio phone and enable it for WebRTC */
-            this.myPhone.enableRTC();
-            /* Wait for new call events to arrive */
-            this.myPhone.addListener('update', function(device) {
-                /* If there are multiple calls, ignore all except the first */
-                if(device.calls.length > 0) {
-
-                    /* If the call is up and has media, attach it to the video tag */
-                    if(device.calls[0].remoteMedia && device.calls[0].state !== 'dead')
-                        attachMediaStream(videoTag, device.calls[0].remoteMedia[0]);
-                }
-            });
+        this.IPCortex = new IPCortexAPI();
+        if(props.isLoggedIn){
+            this.initAPI();
         }
+
         /*
                 setInterval(() => {
                     let transitions = {
@@ -152,6 +143,36 @@ class Phone extends Component {
         */
     }
 
+    initAPI() {
+        if(this.IPCortex.PBX) {
+            JsSIP = this.IPCortex.JsSIP;
+            IPCortex = this.IPCortex;
+            this.myPhone = this.IPCortex.PBX.owned[0];
+            /* Assume the phone is a keevio phone and enable it for WebRTC */
+            this.myPhone.enableRTC()
+            .catch(err => {
+                console.log(err)
+            })
+            /* Wait for new call events to arrive */
+            this.myPhone.addListener('update', function(device) {
+                /* If there are multiple calls, ignore all except the first */
+                if(device.calls.length > 0) {
+
+                    /* If the call is up and has media, attach it to the video tag */
+                    if(device.calls[0].remoteMedia && device.calls[0].state !== 'dead')
+                        attachMediaStream(videoTag, device.calls[0].remoteMedia[0]);
+                }
+            });
+        }
+    }
+
+    // Called by react when props are about to change
+    componentWillReceiveProps(newProps, newState) {
+        // If the API just initialised and we have a previous login token then give it a try
+        if(newProps.isLoggedIn === true && this.props.isLoggedIn === false)
+            initAPI();
+    }
+
     render() {
         return(<View style={styles.container}>
 
@@ -162,8 +183,14 @@ class Phone extends Component {
                                 haveNumber={this.state.dialNumber && this.state.dialNumber.length}
                                 callState={this.state.callState}
                                 onDial={() => {
-                                    this.myPhone.dial()
-                                    this.setState({callState: 'ringing-out'});
+                                    this.myPhone.dial(this.state.dialNumber)
+                                    .then((status) => {
+                                        this.setState({callState: `up`});
+                                    })
+                                    .catch((err) => {
+                                        this.setState({callState: `down`});
+                                    })
+                                    this.setState({callState: `ringing-out`});
 
                                 }}
                                 onAccept={ () => {
