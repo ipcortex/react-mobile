@@ -74,7 +74,7 @@ class LoginWidget extends Component {
         isLoggedIn: PropTypes.bool.isRequired,
         loginError: PropTypes.string,
         loginToken: PropTypes.object,
-        target: PropTypes.string.isRequired,
+        target: PropTypes.string,
         targetValid: PropTypes.bool.isRequired,
     };
 
@@ -92,13 +92,15 @@ class LoginWidget extends Component {
         // If we are a bit out of sync (just restarted and have old state
         // from redux rehydrate) then force an API reload if we have no API
         // but think we have
-        if(this.props.target &&
+        if(!this.props.target || this.props.target === '')
+            this.props.dispatch(actions.invalidateTarget);
+        else if(this.props.target &&
             this.props.target != '' &&
             !this.IPCortex.isLoaded) {
-            this.props.dispatch(actions.invalidateTarget)
+            this.props.dispatch(actions.invalidateTarget);
             this.IPCortex.setServer(this.props.target)
                 .then((hostname) => {
-                    this.props.dispatch(actions.validateTarget)
+                    this.props.dispatch(actions.validateTarget);
                 })
                 .catch((err) => {
                     this.setState({ apiError: err.toString() });
