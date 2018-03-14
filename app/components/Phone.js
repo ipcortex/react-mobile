@@ -62,7 +62,7 @@ class PhoneButton extends Component {
 
                 }]
                 break;
-            case 'ringing-in':
+            case 'ring':
                 buttons = [{
                         type: "up",
                         name: 'phone-incoming',
@@ -79,7 +79,7 @@ class PhoneButton extends Component {
                     }
                 ];
                 break;
-            case 'ringing-out':
+            case 'dial':
                 buttons = [{
                     type: "down",
                     name: 'phone-hangup',
@@ -154,14 +154,30 @@ class Phone extends Component {
                 console.log(err)
             })
             /* Wait for new call events to arrive */
-            this.myPhone.addListener('update', function(device) {
+            this.myPhone.addListener('update', (device) => {
                 /* If there are multiple calls, ignore all except the first */
+                var state = device.calls[0].state
                 if(device.calls.length > 0) {
+                    switch(device.calls[0].state){
+                        case 'dead':
+                            state = 'down'
+                        case 'down':
+                        case 'up':
+                        case 'ring':
+                        case 'dial':
+                            this.setState({callState: device.calls[0].state});
+                            /* If the call is up and has media, attach it to the video tag */
+                            attachMediaStream(videoTag, device.calls[0].remoteMedia[0]);
+                            break;
+                        default:
+                            thow `didn't expect call state ${state}`;
+                            break;
+                    }
 
-                    /* If the call is up and has media, attach it to the video tag */
-                    if(device.calls[0].remoteMedia && device.calls[0].state !== 'dead')
-                        attachMediaStream(videoTag, device.calls[0].remoteMedia[0]);
+
                 }
+                else
+                    this.setState({callState: 'down'});
             });
         }
     }
