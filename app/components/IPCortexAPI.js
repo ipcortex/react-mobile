@@ -11,44 +11,42 @@ var {
 
 var ogetUserMedia = WebRTC.getUserMedia;
 
-getUserMedia = WebRTC.getUserMedia = function (...args){
-    console.log('getUserMedia args: ', args)
+getUserMedia = WebRTC.getUserMedia = function (...args) {
+  console.log('getUserMedia args: ', args)
 
-        if(arguments.length == 1)
-            f =  new Promise((resolve, reject) => ogetUserMedia(...args, resolve, reject));
-            else
-            f = ogetUserMedia(...args)
+  if(arguments.length == 1)
+    f = new Promise((resolve, reject) => ogetUserMedia(...args, resolve, reject));
+  else
+    f = ogetUserMedia(...args)
 
+  f.then(ret => {
+    console.log('GUM ret: ', ret)
+    return ret;
+  });
 
+  return(f);
 
-        return(f.then(ret => (console.log('GUM ret: ', ret) && ret)));
 }
-
-var oRTCSessionDescription = WebRTC.RTCSessionDescription;
-
-RTCSessionDescription = WebRTC.RTCSessionDescription = function (...args){
-        console.log('RTCSessionDescription args: ', args)
-        return(oRTCSessionDescription(...args).then(ret => console.log('GUM ret: ', ret)));
-}
-
 
 global.window.localStorage = global.localStorage = { removeItem: () => console.log('removeItem called') };
 
-Object.assign(global.window, WebRTC, {navigator: WebRTC})
+Object.assign(global.window, WebRTC, { navigator: WebRTC })
 global.window.mediaDevices = global.window.navigator.mediaDevices = { getUserMedia };
 Object.assign(global.window.navigator, WebRTC);
 
-import JsSIP from 'jssip';
+import expJsSIP from 'jssip';
+import expIPCortex from 'ipcortex-api';
+
+global.JsSIP = expJsSIP;
+global.IPCortex = expIPCortex;
 
 global.Utils = JsSIP.Utils;
 
-
-
+IPCortex.PBX.httpStopReuse();
 
 // We use this variable within the module closure to provide a single load
 // of the API state for effciency.
-var state = { WebRTC, IPCortex:{}, PBX:{}, Auth:{}, JsSIP };
-
+var state = { WebRTC, IPCortex: {}, PBX: {}, Auth: {}, JsSIP };
 
 /**
  * Class to load IPCortex API dynamically in a React [Native] environment
@@ -76,26 +74,29 @@ class IPCortexAPI {
 
   }
 
-  startFeed(){
+  startFeed() {
 
   }
 
-  patch(module, text){
-      const Patches = [
-          { module: 'IPCortex', from: 'var _canReuse = true;', to: 'var _canReuse = false;' },
-          { module: 'IPCortex', from: "/* JsSIP.debug.enable('*'); */", to: 'JsSIP.debug.enable("*");' },
-          { module: 'IPCortex', from: 'IPCortex.PBX.Auth.rtcReset(', to: 'Auth.rtcReset(' },
-          { module: 'IPCortex', from: /mediaConstraints: \{/g,
-              to: 'mediaType: { audio: true, video: false }, '+
-                   'rtcOfferConstraints: { offerToReceiveVideo:false },'+
-                   'mediaConstraints: {' }
-      ];
-      var res = text;
-      Patches.forEach((patch) => {
-          if(patch.module == module)
-            res = res.replace(patch.from, patch.to)
-        });
-      return (res);
+  patch(module, text) {
+    const Patches = [
+      { module: 'IPCortex', from: 'var _canReuse = true;', to: 'var _canReuse = false;' },
+      { module: 'IPCortex', from: "/* JsSIP.debug.enable('*'); */", to: 'JsSIP.debug.enable("*");' },
+      // { module: 'IPCortex', from: 'IPCortex.PBX.Auth.rtcReset(', to: 'Auth.rtcReset(' },
+      {
+        module: 'IPCortex',
+        from: /mediaConstraints: \{/g,
+        to: 'mediaType: { audio: true, video: false }, ' +
+          'rtcOfferConstraints: { mandatory: {OfferToReceiveVideo:false} },' +
+          'mediaConstraints: {'
+      }
+    ];
+    var res = text;
+    Patches.forEach((patch) => {
+      if(patch.module == module)
+        res = res.replace(patch.from, patch.to)
+    });
+    return(res);
 
   }
   /**
@@ -106,15 +107,17 @@ class IPCortexAPI {
    * @return {Promise}
    */
   async setServer(hostname) {
+    this.PBX = null;
+    this.hostname = host = hostname;
+    this.server = server = `https://${hostname}`
     try {
       // If we had an API, invalidate it now
-      this.PBX = null;
-      this.hostname = host = hostname;
-      this.server = server = `https://${hostname}`
 
+      /*
       let filesNeeded = [ // { import:'adapter', file: '/cinclude/adapter.js'},
-                            //{ import:'JsSIP', file: '/cinclude/api/jssip/jssip.js'},
-                          { import:'IPCortex', file: '/api/api.js' } ];
+        //{ import:'JsSIP', file: '/cinclude/api/jssip/jssip.js'},
+        { import: 'IPCortex', file: '/api/api.js' }
+      ];
       var code = [];
 
       // This is more serialised than it needs to be but KISS for now
@@ -132,14 +135,16 @@ class IPCortexAPI {
       // module style module.exports and attatches it's payload as a property
       // if it exists as an alternative to creating an IPCortex.PBX global
       // Also throw the WebRTC entrypoints in as params.
+      /*
       let exports = {};
       let module = { exports };
-      let window = Object.assign({}, WebRTC, {navigator: WebRTC})
+      let window = Object.assign({}, WebRTC, { navigator: WebRTC })
       window.mediaDevices = window.navigator.mediaDevices = { getUserMedia };
       Object.assign(window.navigator, WebRTC);
       Object.assign(window, WebRTC);
       window.localStorage = { removeItem: () => console.log('removeItem called') };
-      let execParams = Object.assign({}, { module, exports, window }, window, state, console);
+
+      let execParams = { hostname } //Object.assign({}, { module, exports, global, window }, window, state, console);
       // We fool this by executing it in a function with module, exports & WebRTC APIs as params
       filesNeeded.forEach((file) => {
         text = this.patch(file.import, file.code)
@@ -150,18 +155,21 @@ class IPCortexAPI {
           console.log(err);
         }
         // copy exports into State
-        Object.assign(state, {[file.import]: module.exports})
+        Object.assign(state, {
+          //[file.import]: module.exports
+        })
         // copy exports into the environment of the next module
         Object.assign(execParams, state);
       })
+      */
+      state.IPCortex = global.IPCortex = global.window.IPCortex
       state.PBX = state.IPCortex.PBX;
       state.JsSIP = JsSIP;
-      Object.assign(state.Auth, state.PBX.Auth);
+      //Object.assign(state.Auth, state.PBX.Auth);
       // Also stash the created API plus the WebRTC object it references in this instance
       Object.assign(this, state);
 
-
-      if(typeof this.PBX === 'object') {
+      if(this.isLoaded) {
         // Got a PBX obj, resolve to the hostname
         return hostname;
       } else {

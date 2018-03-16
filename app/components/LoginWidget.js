@@ -179,8 +179,7 @@ class LoginWidget extends Component {
                     tokenCB: (token) => this.props.dispatch(actions.setLoginToken.token(token))
                 }, credentials));
             await this.IPCortex.PBX.startFeed({
-                            device: true,
-                            deviceMin: true
+                            device: true
                         });
             this.props.dispatch(actions.Login);
             return "OK";

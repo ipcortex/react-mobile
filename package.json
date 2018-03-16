@@ -14,6 +14,7 @@
     "babel-core": "^6.26.0",
     "babel-plugin-react-native-web": "^0.4.0",
     "file-loader": "^1.1.6",
+    "ipcortex-api": "file:../ipc-api",
     "jssip": "^3.2.5",
     "material-icons": "^0.1.0",
     "react": "^16.2.0",

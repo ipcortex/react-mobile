@@ -46,7 +46,7 @@ class PhoneButton extends Component {
 
         switch(`${this.props.callState}`) {
             case 'up':
-                buttons = [this.props.haveNumber && {
+                buttons = [{
                     type: "down",
                     name: "phone-hangup",
                     text: 'Hangup',
@@ -54,7 +54,7 @@ class PhoneButton extends Component {
                 }]
                 break;
             case 'down':
-                buttons = [{
+                buttons = [this.props.haveNumber && {
                     type: "up",
                     name: "phone-outgoing",
                     text: 'Call',
@@ -100,8 +100,8 @@ class PhoneButton extends Component {
 
 
         return(<View style={styles.hspaced}>
-                {buttons.map((button) => (<Icon.Button
-                    key={button.type}
+                {buttons.map((button, index) => (<Icon.Button
+                    key={index}
                     color="white"
                     backgroundColor = "transparent"
                     size={50}
@@ -124,7 +124,7 @@ class Phone extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { callState: 'down', videoURL: null, dialNumber: '' };
+        this.state = { callState: 'down', videoURL: null, dialNumber: '', videoURL: null };
         this.IPCortex = new IPCortexAPI();
         if(props.isLoggedIn){
             this.initAPI();
@@ -156,21 +156,23 @@ class Phone extends Component {
             /* Wait for new call events to arrive */
             this.myPhone.addListener('update', (device) => {
                 /* If there are multiple calls, ignore all except the first */
-                var state = device.calls[0].state
+                console.log('Got cb with ', device, device.calls);
                 if(device.calls.length > 0) {
-                    switch(device.calls[0].state){
+                    let Cstate = device.calls[0].state;
+                    switch(Cstate){
                         case 'dead':
-                            state = 'down'
+                            Cstate = 'down'
                         case 'down':
                         case 'up':
                         case 'ring':
                         case 'dial':
-                            this.setState({callState: device.calls[0].state});
+                            this.setState({callState: Cstate});
                             /* If the call is up and has media, attach it to the video tag */
-                            attachMediaStream(videoTag, device.calls[0].remoteMedia[0]);
+                            if(device.calls[0].remoteMedia && device.calls[0].remoteMedia.length === 1)
+                                this.setState({videoURL: device.calls[0].remoteMedia[0].toURL()});
                             break;
                         default:
-                            thow `didn't expect call state ${state}`;
+                            thow `didn't expect call state ${Cstate}`;
                             break;
                     }
 
@@ -193,6 +195,7 @@ class Phone extends Component {
         return(<View style={styles.container}>
 
         <PhoneNumber title="Phone" icon="phone" onChange={(number) => {this.setState({dialNumber: number})}}/>
+        <RTCView streamURL={this.state.videoURL}/>
         <Text>Call State is {this.state.callState}</Text>
 
                             <PhoneButton
@@ -206,14 +209,14 @@ class Phone extends Component {
                                     .catch((err) => {
                                         this.setState({callState: `down`});
                                     })
-                                    this.setState({callState: `ringing-out`});
-
                                 }}
                                 onAccept={ () => {
-                                    this.setState({callState: 'up'});
+                                    this.myPhone.calls[0].talk(() =>
+                                    this.setState({callState: 'up'}));
                                 }}
                                 onHangup={() => {
-                                    this.setState({callState: 'down'});
+                                    this.myPhone.calls[0].hangup(() =>
+                                    this.setState({callState: 'down'}));
                                 }}
                             />
     <RTCView streamURL={this.state.videoURL}/>
