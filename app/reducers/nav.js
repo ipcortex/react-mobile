@@ -15,6 +15,8 @@ import { actions as authActions } from './auth';
 const actions = Object.assign(authActions, {
   NightMode: { type: 'NAV_NIGHTMODE' },
   Forward: { type: 'NAV_FORWARD' },
+  Phone: { type: 'NAV_PHONE' },
+
 });
 
 export { actions };
@@ -40,6 +42,12 @@ export default (state = initialNavState, action) => {
       state
     );
     break;
+    case actions.Phone.type:
+      nextState = AppNavigator.router.getStateForAction(
+        NavigationActions.navigate({ routeName: 'Phone' }),
+        state
+      );
+      break;
   case actions.NightMode.type:
     nextState = AppNavigator.router.getStateForAction(
       NavigationActions.navigate({ routeName: 'NightMode' }),

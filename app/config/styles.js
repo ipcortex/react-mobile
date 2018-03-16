@@ -1,36 +1,60 @@
 import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
+  button: {
+      marginHorizontal: 8
+  },
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+        flexDirection: 'column',
+/*
     backgroundColor: '#F5FCFF',
     borderRadius: 4,
     borderWidth: 0.5,
     borderColor: '#d6d7da'
+    */
   },
   hsub: {
     flex: 1,
     flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'center'
+  },
+  hspaced: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-around'
+  },
+  hsubThin: {
+    flex: 0.2,
+    flexDirection: 'row',
+    alignItems: 'stretch',
     justifyContent: 'center'
   },
   vsub: {
     flex: 1,
     flexDirection: 'column',
     alignItems: 'stretch',
-    justifyContent: 'flex-start'
+    justifyContent: 'space-around',
+  },
+  vsubThin: {
+    flex: 0.2,
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'space-around',
   },
   label: {
     flex: 2,
     alignItems: 'center',
-    justifyContent: 'space-around'
+    justifyContent: 'center'
   },
   control: {
     flex: 3,
     alignItems: 'stretch',
-    justifyContent: 'space-around'
+    justifyContent: 'center'
   },
   fullcontrol: {
     flex: 5,
@@ -58,9 +82,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     marginBottom: 5
-  }
+},
+
+
+  domainInput: {  backgroundColor: "#ededed", borderWidth: 4, borderColor: "#ffffff" },
+  domainInputOK: { backgroundColor: "#ededed", borderWidth: 4, borderColor: "green" },
+  domainInputWarning: { backgroundColor: "#ededed", borderWidth: 4, borderColor: "yellow" },
+  domainInputError: {  backgroundColor: "#ededed", borderWidth: 4, borderColor: "red" }
+
 });
 
+
+import { COLOR, ThemeProvider } from 'react-native-material-ui';
+
+
+const uiTheme = {
+    palette: {
+        primaryColor: COLOR.green500,
+    },
+    toolbar: {
+        container: {
+            height: 50,
+        },
+    },
+};
+
+
 export {
-  styles
+  styles, uiTheme, ThemeProvider
 };

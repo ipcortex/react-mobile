@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { addNavigationHelpers, StackNavigator } from 'react-navigation';
 
-import { LoginScreen } from '../screens/LoginScreen.js';
-import { HomeScreen } from '../screens/HomeScreen.js';
-import { ForwardScreen } from '../screens/ForwardScreen.js';
-import { NightModeScreen } from '../screens/NightModeScreen.js';
+import { LoginScreen } from '../screens/LoginScreen';
+import { HomeScreen } from '../screens/HomeScreen';
+import { PhoneScreen } from '../screens/PhoneScreen.js';
+import { ForwardScreen } from '../screens/ForwardScreen';
+import { NightModeScreen } from '../screens/NightModeScreen';
 import { addListener } from '../utils/redux';
 
 export const AppNavigator = StackNavigator( {
@@ -23,13 +24,17 @@ export const AppNavigator = StackNavigator( {
 Login: {
   screen: LoginScreen
 },
+Phone: {
+  screen: PhoneScreen
+},
 
 } );
 
 class AppWithNavigationState extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    nav: PropTypes.object.isRequired
+    nav: PropTypes.object.isRequired,
+    auth: PropTypes.object.isRequired,
   };
 
   render() {

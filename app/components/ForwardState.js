@@ -9,7 +9,7 @@ import {
 
 import { styles } from '../config/styles.js';
 
-export class ForwardState extends Component {
+export default class ForwardState extends Component {
   constructor(props) {
     super(props);
     this.state = {

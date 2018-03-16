@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, Button, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Button } from 'react-native-material-ui';
 import { connect } from 'react-redux';
 import { NavigationActions } from 'react-navigation';
 import PropTypes from 'prop-types';
@@ -24,14 +25,14 @@ class HomeStatus extends Component {
                 <View>
         <Text>Please log in</Text>
         <Button
-            title={'Open Login Screen'}
+            text={'Open Login Screen'}
             onPress={this.props.loginScreen}
         />
         </View>)
         else
             return(<View>
-        <Button onPress={() => this.props.dispatch( actions.Forward )} title="Set forwards"/>
-          <Button onPress={() => this.props.dispatch( actions.NightMode )} title="Manage Nightmodes"/>
+        <Button onPress={() => this.props.dispatch( actions.Forward )} text="Set forwards" icon="phone-forwarded"/>
+          <Button onPress={() => this.props.dispatch( actions.Phone )} text="Phone" icon="phone"/>
       </View>);
 
     }

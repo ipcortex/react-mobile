@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {AppRegistry, Platform, StyleSheet, Text, View} from 'react-native';
+import {AppRegistry, Platform } from 'react-native';
 
 
 import { Provider } from "react-redux";
@@ -11,7 +11,7 @@ import AppReducer from './reducers';
 import AppWithNavigationState from './navigation/AppNavigator';
 import { middleware } from './utils/redux';
 
-import {styles} from './config/styles.js';
+import { styles, ThemeProvider, uiTheme } from './config/styles.js';
 
 const store = createStore(
   AppReducer,
@@ -24,11 +24,14 @@ const persistor = persistStore(store)
 export default class IPCMobile extends Component {
   render() {
       return (
-          <Provider store={store}>
-              <PersistGate loading={null} persistor={persistor}>
-            <AppWithNavigationState />
-            </PersistGate>
-          </Provider>
+          <ThemeProvider uiTheme={uiTheme}>
+              <Provider store={store}>
+                  <PersistGate loading={null} persistor={persistor}>
+                      <AppWithNavigationState />
+                  </PersistGate>
+              </Provider>
+          </ThemeProvider>
+
         );
     }
 
