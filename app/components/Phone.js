@@ -15,6 +15,7 @@ import {
     MediaStreamTrack,
     getUserMedia
 } from './IPCortexAPI';
+import InCallManager from 'react-native-incall-manager';
 
 
 
@@ -126,7 +127,7 @@ class Phone extends Component {
         super(props);
         this.state = { callState: 'down', videoURL: null, dialNumber: '', videoURL: null };
         this.IPCortex = new IPCortexAPI();
-        if(props.isLoggedIn){
+        if(props.isLoggedIn) {
             this.initAPI();
         }
 
@@ -148,38 +149,59 @@ class Phone extends Component {
             JsSIP = this.IPCortex.JsSIP;
             IPCortex = this.IPCortex;
             this.myPhone = this.IPCortex.PBX.owned[0];
+            lastState = null;
+            var { inRinging, inRingback, haveCall } = false;
             /* Assume the phone is a keevio phone and enable it for WebRTC */
             this.myPhone.enableRTC()
-            .catch(err => {
-                console.log(err)
-            })
+                .catch(err => {
+                    console.log(err)
+                })
             /* Wait for new call events to arrive */
             this.myPhone.addListener('update', (device) => {
                 /* If there are multiple calls, ignore all except the first */
                 console.log('Got cb with ', device, device.calls);
-                if(device.calls.length > 0) {
-                    let Cstate = device.calls[0].state;
-                    switch(Cstate){
-                        case 'dead':
-                            Cstate = 'down'
-                        case 'down':
-                        case 'up':
-                        case 'ring':
-                        case 'dial':
-                            this.setState({callState: Cstate});
-                            /* If the call is up and has media, attach it to the video tag */
-                            if(device.calls[0].remoteMedia && device.calls[0].remoteMedia.length === 1)
-                                this.setState({videoURL: device.calls[0].remoteMedia[0].toURL()});
-                            break;
-                        default:
-                            thow `didn't expect call state ${Cstate}`;
-                            break;
-                    }
+                let Cstate = 'down';
+                if(device.calls.length > 0)
+                    Cstate = device.calls[0].state;
+                console.log(Cstate);
 
-
+                if(inRingback && Cstate != 'dial') {
+                    InCallManager.stopRingback();
+                    inRingback = false;
                 }
-                else
-                    this.setState({callState: 'down'});
+                if(inRinging && Cstate != 'ring') {
+                    InCallManager.stopRingtone();
+                    inRinging = false;
+                }
+                switch(Cstate) {
+                    case 'dead':
+                        Cstate = 'down';
+                    case 'down':
+                        InCallManager.stop();
+                        this.setState({ callState: Cstate });
+                        break;
+                    case 'up':
+                        InCallManager.start({ media: 'audio' });
+                        this.setState({ callState: Cstate });
+                        /* If the call is up and has media, attach it to the video tag */
+                        if(device.calls[0].remoteMedia && device.calls[0].remoteMedia.length === 1)
+                            this.setState({ videoURL: device.calls[0].remoteMedia[0].toURL() });
+                        break;
+                    case 'ring':
+                        InCallManager.startRingtone('_DEFAULT_', true, 'playback');
+                        inRinging = true;
+                        this.setState({ callState: Cstate });
+                    case 'dial':
+                        // Use native platform ringback tone
+                        // TODO early media???
+                        InCallManager.start({ media: 'audio', ringback: '_BUNDLE_' });
+                        this.setState({ callState: Cstate });
+                        inRingback = true;
+                        break;
+                    default:
+                        thow `didn't expect call state ${Cstate}`;
+                        break;
+                }
             });
         }
     }
@@ -204,10 +226,11 @@ class Phone extends Component {
                                 onDial={() => {
                                     this.myPhone.dial(this.state.dialNumber)
                                     .then((status) => {
+                                        InCallManager.start({media: 'audio'});
                                         this.setState({callState: `up`});
                                     })
                                     .catch((err) => {
-                                        this.setState({callState: `down`});
+                                        console.log('dial fail: ', err);
                                     })
                                 }}
                                 onAccept={ () => {

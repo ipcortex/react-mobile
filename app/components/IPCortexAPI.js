@@ -1,3 +1,4 @@
+import { AsyncStorage } from 'react-native';
 import WebRTC from 'react-native-webrtc';
 var {
   RTCPeerConnection,
@@ -9,26 +10,8 @@ var {
   getUserMedia,
 } = WebRTC;
 
-var ogetUserMedia = WebRTC.getUserMedia;
 
-getUserMedia = WebRTC.getUserMedia = function (...args) {
-  console.log('getUserMedia args: ', args)
-
-  if(arguments.length == 1)
-    f = new Promise((resolve, reject) => ogetUserMedia(...args, resolve, reject));
-  else
-    f = ogetUserMedia(...args)
-
-  f.then(ret => {
-    console.log('GUM ret: ', ret)
-    return ret;
-  });
-
-  return(f);
-
-}
-
-global.window.localStorage = global.localStorage = { removeItem: () => console.log('removeItem called') };
+global.window.localStorage = global.localStorage = AsyncStorage;
 
 Object.assign(global.window, WebRTC, { navigator: WebRTC })
 global.window.mediaDevices = global.window.navigator.mediaDevices = { getUserMedia };
@@ -42,6 +25,7 @@ global.IPCortex = expIPCortex;
 
 global.Utils = JsSIP.Utils;
 
+// React Native XMLHttpRequest shim does not like being reused!
 IPCortex.PBX.httpStopReuse();
 
 // We use this variable within the module closure to provide a single load
