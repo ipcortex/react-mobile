@@ -1,3 +1,8 @@
+/**
+ * Phone Component
+ * @module Phone
+ */
+
 import React, { Component } from 'react';
 import { ListView, Platform, StyleSheet, Text, ScrollView, TouchableHighlight, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -38,13 +43,20 @@ Object.assign(styles, {
 })
 
 
-
+/**
+ * Renders one or more buttons based on the callState prop
+ *
+ * @extends Component
+ */
 class PhoneButton extends Component {
 
 
     render() {
 
-
+        // Build an array of which buttons we need for the current call state.
+        // This is all a bit quick and hacky as it needs replacing with a proper
+        // gesture based UI but we are only a proof of concept for now
+        // TODO: proper mobile UI rather than button stab for call control
         switch(`${this.props.callState}`) {
             case 'up':
                 buttons = [{
@@ -89,6 +101,8 @@ class PhoneButton extends Component {
 
                 }]
                 break;
+            // We shouldn't ever see anything else, but give a public indication
+            // of breakage if we do.
             default:
                 buttons = [{
                     type: "down",
@@ -98,8 +112,7 @@ class PhoneButton extends Component {
                 }]
         }
 
-
-
+        // Now output the rendered buttons
         return(<View style={styles.hspaced}>
                 {buttons.map((button, index) => (<Icon.Button
                     key={index}
@@ -119,44 +132,55 @@ class PhoneButton extends Component {
     }
 }
 
+/**
+ * Implements a softphone
+ *
+ * @extends Component
+ * @alias module:Phone
+ */
 class Phone extends Component {
 
 
 
-    constructor(props) {
+    constructor(props, testing) {
         super(props);
-        this.state = { callState: 'down', videoURL: null, dialNumber: '', videoURL: null };
+        this.state = { callState: 'down', dialNumber: '', videoURL: null };
         this.IPCortex = new IPCortexAPI();
         if(props.isLoggedIn) {
             this.initAPI();
         }
 
-        /*
-                setInterval(() => {
-                    let transitions = {
-                        up: 'down',
-                        down: 'ringing-in',
-                        'ringing-in': 'down',
-                        'ringing-out': 'up'
-                    };
-                    this.setState({ callState: transitions[this.state.callState] });
-                }, 8000);
-        */
+        if(testing) {
+            // Test rig that just does some sensible asnyc state transitions
+            // used in development and manual testing
+            setInterval(() => {
+                let transitions = {
+                    up: 'down',
+                    down: 'ringing-in',
+                    'ringing-in': 'down',
+                    'ringing-out': 'up'
+                };
+                this.setState({ callState: transitions[this.state.callState] });
+            }, 8000);
+        }
     }
 
     initAPI() {
+        // Called when we know we are logged in so should have an IPCortex API
+        // with an owned softphone at this point.
         if(this.IPCortex.PBX) {
+            // TODO: More error checking (plus just how many places do we stash
+            // IPCortex and JsSIP objects??)
             JsSIP = this.IPCortex.JsSIP;
             IPCortex = this.IPCortex;
             this.myPhone = this.IPCortex.PBX.owned[0];
-            lastState = null;
             var { inRinging, inRingback, haveCall } = false;
             /* Assume the phone is a keevio phone and enable it for WebRTC */
             this.myPhone.enableRTC()
                 .catch(err => {
                     console.log(err)
                 })
-            /* Wait for new call events to arrive */
+            /* Listener which wait for new call events to arrive */
             this.myPhone.addListener('update', (device) => {
                 /* If there are multiple calls, ignore all except the first */
                 console.log('Got cb with ', device, device.calls);
@@ -184,7 +208,7 @@ class Phone extends Component {
                         InCallManager.start({ media: 'audio' });
                         this.setState({ callState: Cstate });
                         /* If the call is up and has media, attach it to the video tag */
-                        if(device.calls[0].remoteMedia && device.calls[0].remoteMedia.length === 1)
+                        if(device.calls[0].remoteMedia && device.calls[0].remoteMedia.length > 0)
                             this.setState({ videoURL: device.calls[0].remoteMedia[0].toURL() });
                         break;
                     case 'ring':
@@ -203,23 +227,24 @@ class Phone extends Component {
                         break;
                 }
             });
+        } else {
+            throw 'IPCortex API not loaded when trying to start Phone';
         }
     }
 
     // Called by react when props are about to change
     componentWillReceiveProps(newProps, newState) {
-        // If the API just initialised and we have a previous login token then give it a try
+        // If we weren't logged in, but now we are then initialise a phone
         if(newProps.isLoggedIn === true && this.props.isLoggedIn === false)
             initAPI();
     }
 
     render() {
+        //TODO: Styling!!!
         return(<View style={styles.container}>
-
         <PhoneNumber title="Phone" icon="phone" onChange={(number) => {this.setState({dialNumber: number})}}/>
         <RTCView streamURL={this.state.videoURL}/>
         <Text>Call State is {this.state.callState}</Text>
-
                             <PhoneButton
                                 haveNumber={this.state.dialNumber && this.state.dialNumber.length}
                                 callState={this.state.callState}
@@ -243,7 +268,6 @@ class Phone extends Component {
                                 }}
                             />
     <RTCView streamURL={this.state.videoURL}/>
-
     </View>)
     }
 }

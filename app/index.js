@@ -17,11 +17,22 @@ const store = createStore(
   AppReducer,
   applyMiddleware(middleware),
 );
-const persistor = persistStore(store)
+const persistor = persistStore(store);
 
 
-
+/**
+ * IPCMobile root React Native Component
+ *
+ * @type {Class}
+ * @name IPCMobile
+ */
 export default class IPCMobile extends Component {
+    /**
+     * [render description]
+     *
+     * @method render
+     * @return {[type]} [description]
+     */
   render() {
       return (
           <ThemeProvider uiTheme={uiTheme}>

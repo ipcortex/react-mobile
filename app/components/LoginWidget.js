@@ -70,11 +70,17 @@ class LoginWidget extends Component {
 
     // We expect to get these state variables as props
     static propTypes = {
+        /** Redux dispatcher */
         dispatch: PropTypes.func.isRequired,
+        /** Are we logged in to API */
         isLoggedIn: PropTypes.bool.isRequired,
+        /** If not isLoggedIn, the last login error */
         loginError: PropTypes.string,
+        /** Login token returned by last API login, may or may not be valid */
         loginToken: PropTypes.object,
+        /** The target PBX hostname */
         target: PropTypes.string,
+        /** true if we have sucessfully loaded the API from the target host */
         targetValid: PropTypes.bool.isRequired,
     };
 
@@ -111,18 +117,15 @@ class LoginWidget extends Component {
     }
 
 
-    // Called by react just after we are initialised
-    componentDidMount() {
-        console.log('didMount???');
-    }
-
     // Called by react when props are about to change
     componentWillReceiveProps(newProps, newState) {
         // If the API just initialised and we have a previous login token then give it a try
         if(newProps.targetValid === true && this.props.targetValid === false)
             if(typeof newProps.loginToken === 'object')
                 this.do_login({ token: this.props.loginToken })
+                // Nothing to do if we succeded, do_login takes care of firing state changes
                 .then((status) => console.log(status))
+                // failed? no point hanging on to a duff token but do_login cant do this for us
                 .catch((err) => {
                     this.props.dispatch(actions.setLoginToken.token(null));
                 });
@@ -162,8 +165,8 @@ class LoginWidget extends Component {
         }
     }
     /**
-     * User login to an instance of the API. Async, returns immediately and caller never
-     * finds out any more. Ultimately dispatches a 'Login' or 'loginError' state change
+     * User login to an instance of the API. Async, returns immediately with Promise and caller
+     * need not care too much as ultimately dispatches a 'Login' or 'loginError' state change
      * action on the UI.
      *
      * @method do_login
