@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Button } from 'react-native-material-ui';
 import { connect } from 'react-redux';
 import { NavigationActions } from 'react-navigation';
 import PropTypes from 'prop-types';

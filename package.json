@@ -21,6 +21,7 @@
     "react-dom": "^16.2.0",
     "react-native": "^0.53.0",
     "react-native-incall-manager": "^3.1.0",
+    "react-native-material-ui": "^1.20.0",
     "react-native-modal-selector": "^0.0.24",
     "react-native-push-notification": "^3.0.2",
     "react-native-sensitive-info": "^5.1.0",
