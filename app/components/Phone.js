@@ -142,7 +142,7 @@ class Phone extends Component {
 
 
 
-    constructor(props, testing) {
+    constructor(props) {
         super(props);
         this.state = { callState: 'down', dialNumber: '', videoURL: null };
         this.IPCortex = new IPCortexAPI();
@@ -150,7 +150,7 @@ class Phone extends Component {
             this.initAPI();
         }
 
-        if(testing) {
+        if(props.testing) {
             // Test rig that just does some sensible asnyc state transitions
             // used in development and manual testing
             setInterval(() => {
