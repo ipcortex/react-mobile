@@ -10,6 +10,7 @@ import { styles } from '../config/styles.js';
 import { actions } from '../reducers';
 
 import { IPCortexAPI } from './IPCortexAPI';
+import IPCortexConfig from '../config/ipcortex'
 
 /**
  * Input a domain name with validation and format hints
@@ -175,7 +176,7 @@ class LoginWidget extends Component {
      */
     async do_login(credentials) {
         try {
-            this.IPCortex.PBX.Auth.setHost(`https://${this.props.target}`);
+            this.IPCortex.PBX.Auth.setHost(IPCortexConfig.proxy);
             await this.IPCortex.PBX.Auth.login(Object.assign({
                     notoken: false,
                     nodom: true,
