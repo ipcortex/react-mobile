@@ -176,15 +176,27 @@ class LoginWidget extends Component {
      */
     async do_login(credentials) {
         try {
+            // This is a bit of trickery to prime the proxy server with some state that tells
+            // it which real server we want to connect to. We do nothing with the result, but
+            // it pushes a cookie back which it will use to direct future requests.
+            if(credentials.username) {
+                let response = await fetch(`${IPCortexConfig.proxy}/server/set/${credentials.username}/${this.props.target}`);
+                if(response.status == 200) {
+                    let body = await response.text();
+                } else {
+                    throw `could not load ${this.server}${file.file} from ${hostname}`;
+                }
+            }
             this.IPCortex.PBX.Auth.setHost(IPCortexConfig.proxy);
+
             await this.IPCortex.PBX.Auth.login(Object.assign({
-                    notoken: false,
-                    nodom: true,
-                    tokenCB: (token) => this.props.dispatch(actions.setLoginToken.token(token))
-                }, credentials));
+                notoken: false,
+                nodom: true,
+                tokenCB: (token) => this.props.dispatch(actions.setLoginToken.token(token))
+            }, credentials));
             await this.IPCortex.PBX.startFeed({
-                            device: true
-                        });
+                device: true
+            });
             this.props.dispatch(actions.Login);
             return "OK";
 
