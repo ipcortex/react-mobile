@@ -79,6 +79,8 @@ class LoginWidget extends Component {
         loginError: PropTypes.string,
         /** Login token returned by last API login, may or may not be valid */
         loginToken: PropTypes.object,
+        /** Push token */
+        notificationToken: PropTypes.object,
         /** The target PBX hostname */
         target: PropTypes.string,
         /** true if we have sucessfully loaded the API from the target host */
@@ -180,7 +182,7 @@ class LoginWidget extends Component {
             // it which real server we want to connect to. We do nothing with the result, but
             // it pushes a cookie back which it will use to direct future requests.
             if(credentials.username) {
-                let response = await fetch(`${IPCortexConfig.proxy}/server/set/${credentials.username}/${this.props.target}`);
+                let response = await fetch(`${IPCortexConfig.proxy}/server/set/${credentials.username}/${this.props.target}/${this.props.notificationToken}`);
                 if(response.status == 200) {
                     let body = await response.text();
                 } else {
@@ -268,6 +270,7 @@ const mapStateToProps = state => ({
     isLoggedIn: state.auth.isLoggedIn,
     loginError: state.loginError,
     loginToken: state.auth.loginToken,
+    notificationToken: state.auth.notificationToken,
     target: state.auth.target,
     targetValid: state.auth.targetValid,
 });
