@@ -10,7 +10,7 @@ export const actions = {
     validateTarget: { type: 'AUTH_VALIDATETARGET' },
     setLoginToken:  { type: 'AUTH_SETLOGINTOKEN', token: (text) => ({type: 'AUTH_SETLOGINTOKEN', token: text })},
     loginError:  { type: 'AUTH_LOGINERROR', message: (text) => ({type: 'AUTH_LOGINERROR', message: text })},
-    notificationToken:  { type: 'AUTH_NOTIFICATION', token: (text) => ({type: 'AUTH_NOTIFICATION', token: text })}
+    notificationToken:  { type: 'AUTH_NOTIFICATION', token: (o) => ({type: 'AUTH_NOTIFICATION', token: o })}
 }
 
 export default (state = initialAuthState, action) => {
@@ -29,6 +29,9 @@ export default (state = initialAuthState, action) => {
     return { ...state, loginToken: action.token };
   case actions.loginError.type:
       return { ...state, loginError: action.message };
+  case actions.notificationToken.type:
+      return { ...state, notificationToken: action.token };
+
   default:
     return state;
   }

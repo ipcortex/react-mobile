@@ -27,6 +27,7 @@ PushNotification.configure({
 
   // (optional) Called when Token is generated (iOS and Android)
   onRegister: ({token, os}) => {
+      console.log('onregister: ', token, os)
     store.dispatch(actions.notificationToken.token({token, os}));
   },
 
@@ -51,7 +52,7 @@ PushNotification.configure({
   // Leave this off unless you have good reason.
   popInitialNotification: true,
 
-  requestPermissions: false
+  requestPermissions: true
 });
 /**
  * IPCMobile root React Native Component

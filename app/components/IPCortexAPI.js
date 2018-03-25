@@ -10,6 +10,8 @@ var {
     getUserMedia,
 } = WebRTC;
 
+import IPCortexConfig from '../config/ipcortex';
+
 // This module was initially conceived to pull the API from the target
 // PBX environment and cache a static instance within this module closure
 // rather than poluting the global object. This took a bunch of hacks
@@ -102,7 +104,7 @@ class IPCortexAPI {
      * @param  {string}  hostname PBX hostname
      * @return {Promise}
      */
-    async setServer(hostname) {
+    async loadAPI(hostname) {
         this.PBX = null;
         this.hostname = host = hostname;
         this.server = server = `https://${hostname}`
@@ -110,7 +112,7 @@ class IPCortexAPI {
             // If we had an API, invalidate it now
             if(!localAPIBuild) {
                 let filesNeeded = [ // { import:'adapter', file: '/cinclude/adapter.js'},
-                    { import:'JsSIP', file: '/cinclude/api/jssip/jssip.js'},
+                    { import: 'JsSIP', file: '/cinclude/api/jssip/jssip.js' },
                     { import: 'IPCortex', file: '/api/api.js' }
                 ];
                 var code = [];
@@ -156,7 +158,7 @@ class IPCortexAPI {
                     // copy exports into the environment of the next module
                     Object.assign(execParams, state);
                 })
-                Object.assign(state, {Auth: state.IPCortex.PBX.Auth, PBX: state.IPCortex.PBX} );
+                Object.assign(state, { Auth: state.IPCortex.PBX.Auth, PBX: state.IPCortex.PBX });
 
             } else {
                 state.IPCortex = global.IPCortex = global.window.IPCortex
@@ -182,6 +184,58 @@ class IPCortexAPI {
             throw `${error.toString()} reading from ${hostname}`
         }
     }
+
+    /**
+     * This is a bit of trickery to prime the proxy server with some state that tells
+     *  it which real server we want to connect to. We do nothing with the result, but
+     *  it pushes a cookie back which it will use to direct future requests.
+     *
+     * @method setServer
+     * @param  {[type]}  server                 Server name
+     * @param  {String}  [username='anonymous'] Username if we know it
+     * @return {Promise}                        Resolves when server has been set
+     */
+    async setServer(server, username = 'anonymous') {
+        let response = await fetch(`${IPCortexConfig.proxy}/server/set/${username}/${server}`);
+        if(response.status == 200) {
+            let body = await response.text();
+            this.haveSetServer = true;
+            if (this.tokenToSend){
+                await this.sendNotificationToken(this.tokenToSend);
+                delete this.tokenToSend;
+            }
+        } else {
+            throw `could no set server ${hostname} at proxy ${IPCortexConfig.proxy}`;
+        }
+
+        this.PBX.Auth.setHost(IPCortexConfig.proxy);
+    }
+
+    /**
+     * Send notification token to server, will defer this until we have setServer
+     * if we get the token too early.
+     *
+     * @method sendNotificationToken
+     * @param  {token}              token opaque thing that means something to the server
+     * @return {Promise}                  resolves when request is complete
+     */
+    async sendNotificationToken(token) {
+        if(this.haveSetServer) {
+            let response = await fetch(`${IPCortexConfig.proxy}/server/token/${token.os}/${token.token}`);
+            if(response.status == 200) {
+                let body = await response.text();
+            } else {
+                // try again later perhaps
+                this.tokenToSend = token;
+                throw `could not set token at proxy ${IPCortexConfig.proxy}`;
+            }
+        } else {
+            this.tokenToSend = token;
+        }
+    }
+
+
+
     get isLoaded() {
         return this.PBX && this.PBX.Auth && typeof this.PBX.Auth === 'object';
     }

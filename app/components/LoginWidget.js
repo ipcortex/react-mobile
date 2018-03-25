@@ -10,7 +10,7 @@ import { styles } from '../config/styles.js';
 import { actions } from '../reducers';
 
 import { IPCortexAPI } from './IPCortexAPI';
-import IPCortexConfig from '../config/ipcortex'
+import IPCortexConfig from '../config/ipcortex';
 
 /**
  * Input a domain name with validation and format hints
@@ -107,7 +107,7 @@ class LoginWidget extends Component {
             this.props.target != '' &&
             !this.IPCortex.isLoaded) {
             this.props.dispatch(actions.invalidateTarget);
-            this.IPCortex.setServer(this.props.target)
+            this.IPCortex.loadAPI(this.props.target)
                 .then((hostname) => {
                     this.props.dispatch(actions.validateTarget);
                 })
@@ -118,8 +118,6 @@ class LoginWidget extends Component {
 
 
     }
-
-
     // Called by react when props are about to change
     componentWillReceiveProps(newProps, newState) {
         // If the API just initialised and we have a previous login token then give it a try
@@ -132,6 +130,8 @@ class LoginWidget extends Component {
                 .catch((err) => {
                     this.props.dispatch(actions.setLoginToken.token(null));
                 });
+        else (newProps.notificationToken != this.props.notificationToken)
+            this.IPCortex.sendNotificationToken(newProps.notificationToken);
     }
     /**
      * Render inline tags to output confirmation of current login server (if API is valid),
@@ -154,7 +154,7 @@ class LoginWidget extends Component {
               onSubmit={(text) => {
                                 this.props.dispatch( actions.setTarget.hostname(text) );
                                 if(text != '')
-                                    this.IPCortex.setServer(text)
+                                    this.IPCortex.loadAPI(text)
                                     .then((hostname) => this.props.dispatch(actions.validateTarget))
                                     .catch((err) => {
                                             this.props.dispatch(actions.invalidateTarget);
@@ -178,18 +178,7 @@ class LoginWidget extends Component {
      */
     async do_login(credentials) {
         try {
-            // This is a bit of trickery to prime the proxy server with some state that tells
-            // it which real server we want to connect to. We do nothing with the result, but
-            // it pushes a cookie back which it will use to direct future requests.
-            if(credentials.username) {
-                let response = await fetch(`${IPCortexConfig.proxy}/server/set/${credentials.username}/${this.props.target}/${this.props.notificationToken}`);
-                if(response.status == 200) {
-                    let body = await response.text();
-                } else {
-                    throw `could not load ${this.server}${file.file} from ${hostname}`;
-                }
-            }
-            this.IPCortex.PBX.Auth.setHost(IPCortexConfig.proxy);
+            this.IPCortex.setServer(this.props.target, credentials.username)
 
             await this.IPCortex.PBX.Auth.login(Object.assign({
                 notoken: false,
