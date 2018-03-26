@@ -57,4 +57,4 @@ ios/
 
 yarn.lock
 
-apps/config/private.js
+app/config/private.js
