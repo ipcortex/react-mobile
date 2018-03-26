@@ -56,3 +56,5 @@ android/
 ios/
 
 yarn.lock
+
+apps/config/private.js

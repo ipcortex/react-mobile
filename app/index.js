@@ -7,11 +7,11 @@ import { compose, createStore, applyMiddleware } from 'redux';
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
 
+import pushNotification from 'lib/pushNotification';
+
 import AppReducer, { actions } from './reducers';
 import AppWithNavigationState from './navigation/AppNavigator';
 import { middleware } from './utils/redux';
-
-import PushNotification from 'react-native-push-notification';
 
 import { styles, ThemeProvider, uiTheme } from './config/styles.js';
 
@@ -22,38 +22,17 @@ const store = createStore(
 const persistor = persistStore(store);
 
 
-// https://github.com/zo0r/react-native-push-notification
-PushNotification.configure({
+var notification = new (store.dispatch, actions.notificationToken.token, actions.Phone);
+// This needs to be here as it has to initialise
+//  when the app is launched in background mode which
+//  doesn't start the React lifecycle. Any deeper in the
+//  project and onNotification isn't primed to fire when
+//  the app is (re)started which means we don't process background
+//  notifications
+notification.register();
 
-  // (optional) Called when Token is generated (iOS and Android)
-  onRegister: ({token, os}) => {
-      console.log('onregister: ', token, os)
-    store.dispatch(actions.notificationToken.token({token, os}));
-  },
 
-  // (required) Called when a remote or local notification is opened or received
-  onNotification: (notification) => {
-    console.log('notification', notification)
-    store.dispatch(actions.Phone);
-  },
 
-  // ANDROID ONLY: (optional) GCM Sender ID.
-  senderID: '86871340226',
-
-  // IOS ONLY (optional): default: all - Permissions to register.
-  permissions: {
-    alert: true,
-    badge: true,
-    sound: true
-  },
-
-  // Should the initial notification be popped automatically
-  // default: true
-  // Leave this off unless you have good reason.
-  popInitialNotification: true,
-
-  requestPermissions: true
-});
 /**
  * IPCMobile root React Native Component
  *
