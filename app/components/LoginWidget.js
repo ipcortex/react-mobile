@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { styles } from '../config/styles.js';
 import { actions } from '../reducers';
 
-import { IPCortexAPI } from './IPCortexAPI';
+import { IPCortexAPI } from '../lib/IPCortexAPI';
 import IPCortexConfig from '../config/ipcortex';
 
 /**

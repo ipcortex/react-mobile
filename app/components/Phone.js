@@ -19,7 +19,7 @@ import {
     MediaStream,
     MediaStreamTrack,
     getUserMedia
-} from './IPCortexAPI';
+} from '../lib/IPCortexAPI';
 import InCallManager from 'react-native-incall-manager';
 
 
