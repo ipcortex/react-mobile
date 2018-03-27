@@ -204,11 +204,12 @@ class IPCortexAPI {
                 await this.sendNotificationToken(this.tokenToSend);
                 delete this.tokenToSend;
             }
+            this.PBX.Auth.setHost(IPCortexConfig.proxy);
         } else {
-            throw `could no set server ${hostname} at proxy ${IPCortexConfig.proxy}`;
+            throw `could not set server ${hostname} at proxy ${IPCortexConfig.proxy}`;
         }
 
-        this.PBX.Auth.setHost(IPCortexConfig.proxy);
+
     }
 
     /**

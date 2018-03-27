@@ -1,25 +1,31 @@
 import React, {Component} from 'react';
 import {AppRegistry, Platform } from 'react-native';
-
+import {createStore, applyMiddleware, combineReducers} from "redux";
 
 import { Provider } from "react-redux";
-import { compose, createStore, applyMiddleware } from 'redux';
-import { persistStore } from 'redux-persist'
-import { PersistGate } from 'redux-persist/integration/react'
+
+import { Navigation } from 'react-native-navigation';
+
+import registerScreens from './screens';
+
+//import { persistStore } from 'redux-persist'
+//import { PersistGate } from 'redux-persist/integration/react'
 
 import pushNotification from './lib/pushNotification';
 
 import AppReducer, { actions } from './reducers';
-import AppWithNavigationState from './navigation/AppNavigator';
-import { middleware } from './utils/redux';
 
-import { styles, ThemeProvider, uiTheme } from './config/styles.js';
+import thunk from "redux-thunk";
 
-const store = createStore(
+
+const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
+const store = createStoreWithMiddleware(
   AppReducer,
-  applyMiddleware(middleware),
 );
-const persistor = persistStore(store);
+
+//const persistor = persistStore(store);
+
+registerScreens(store, Provider);
 
 
 var notification = new pushNotification(store.dispatch, actions.notificationToken.token, actions.Phone);
@@ -40,25 +46,59 @@ notification.register();
  * @name IPCMobile
  */
 export default class IPCMobile extends Component {
-    /**
-     * [render description]
-     *
-     * @method render
-     * @return {[type]} [description]
-     */
-  render() {
-      return (
-          <ThemeProvider uiTheme={uiTheme}>
-              <Provider store={store}>
-                  <PersistGate loading={null} persistor={persistor}>
-                      <AppWithNavigationState />
-                  </PersistGate>
-              </Provider>
-          </ThemeProvider>
-
-        );
+    constructor(props) {
+        super(props);
+        store.subscribe(this.onStoreUpdate.bind(this));
+        store.dispatch(appActions.appInitialized());
     }
 
+    onStoreUpdate() {
+        let { root } = store.getState().root;
+        // handle a root change
+        if(this.currentRoot != root) {
+            this.currentRoot = root;
+            this.startApp(root);
+        }
+    }
+
+    startApp(root) {
+        switch(root) {
+            case 'login':
+            Navigation.startSingleScreenApp({
+                        screen: {
+                        screen: 'IPCMobile.Login',
+                        title: 'Login',
+                        navigatorStyle: {},
+                        navigatorButtons: {}
+                    },
+            });
+            return;
+            case 'after-login':
+                Navigation.startTabBasedApp({
+                    tabs: [{
+                            label: 'Phone',
+                            screen: 'IPCMobile.Phone',
+                            //icon: require('./img/checkmark.png'),
+                            //selectedIcon: require('./img/checkmark.png'),
+                            title: 'Phone',
+                            overrideBackPress: false, //this can be turned to true for android
+                            navigatorStyle: {}
+                        },
+                        {
+                            label: 'Settings',
+                            screen: 'IPCMobile.Forwards',
+                            //icon: require('./img/checkmark.png'),
+                            //selectedIcon: require('./img/checkmark.png'),
+                            title: 'Settings',
+                            navigatorStyle: {}
+                        }
+
+                    ],
+                });
+                return;
+            default: //no root found
+        }
+    }
 }
 
 AppRegistry.registerComponent('IPCMobile', () => IPCMobile);

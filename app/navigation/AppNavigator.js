@@ -1,48 +1,39 @@
+import { Navigation } from 'react-native-navigation';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { addNavigationHelpers, StackNavigator, TabNavigator, createBottomTabNavigator } from 'react-navigation';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { LoginScreen } from '../screens/LoginScreen';
-import { HomeScreen } from '../screens/HomeScreen';
-import { PhoneScreen } from '../screens/PhoneScreen.js';
-import { ForwardScreen } from '../screens/ForwardScreen';
-import { NightModeScreen } from '../screens/NightModeScreen';
-import { addListener } from '../utils/redux';
 
-
-const nestedNav = TabNavigator(
-{
-    Phone: {
-        screen: PhoneScreen,
-        navigationOptions: {
-            title: 'Phone',
-            tabBarLabel: 'Phone',
-            tabBarIcon: ({ tintColor, focused }) => (
-                <Icon name="phone" />
-            ),
+/*
+const nestedNav = TabNavigator({
+        Phone: {
+            screen: PhoneScreen,
+            navigationOptions: {
+                title: 'Phone',
+                tabBarLabel: 'Phone',
+                tabBarIcon: ({ tintColor, focused }) => (
+                    <Icon name="phone" />
+                ),
+            },
         },
-    },
-    Forward: {
-        screen: ForwardScreen,
-        navigationOptions: {
-            title: 'Forwards',
-            tabBarIcon: ({ tintColor, focused }) => (
-                <Icon name="settings" />
-            ),
+        Forward: {
+            screen: ForwardScreen,
+            navigationOptions: {
+                title: 'Forwards',
+                tabBarIcon: ({ tintColor, focused }) => (
+                    <Icon name="settings" />
+                ),
+            },
         },
-    },
-},
-{
-  tabBarPosition: 'bottom',
-  animationEnabled: false,
-  swipeEnabled: false,
-}
+    }, {
+        tabBarPosition: 'bottom',
+        animationEnabled: false,
+        swipeEnabled: false,
+    }
 
 );
 
-/*
+
 const TabNav = createBottomTabNavigator(
   {
     MainTab: {
@@ -71,7 +62,7 @@ const TabNav = createBottomTabNavigator(
     swipeEnabled: false,
   }
 );
-*/
+
 export const AppNavigator = StackNavigator({
     Home: {
         screen: nestedNav,
@@ -81,24 +72,62 @@ export const AppNavigator = StackNavigator({
     }
 });
 
+*/
 
 
 class AppWithNavigationState extends React.Component {
-    static propTypes = {
-        dispatch: PropTypes.func.isRequired,
-        nav: PropTypes.object.isRequired,
-        auth: PropTypes.object.isRequired,
-    };
+    constructor(props) {
+        super(props);
+        store.subscribe(this.onStoreUpdate.bind(this));
+        store.dispatch(appActions.appInitialized());
+    }
 
-    render() {
-        const { dispatch, nav, auth } = this.props;
-        return(<AppNavigator
-        navigation={addNavigationHelpers( { dispatch, state: nav, addListener } )}
-        screenProps={{dispatch, auth}}
-    />);
+    onStoreUpdate() {
+        let { root } = store.getState()
+            .app;
+        // handle a root change
+        if(this.currentRoot != root) {
+            this.currentRoot = root;
+            this.startApp(root);
+        }
+    }
+
+    startApp(root) {
+        switch(root) {
+            case 'login':
+            Navigation.startSingleScreenApp({
+                        screen: {
+                        screen: 'IPCMobile.Login',
+                        title: 'Login',
+                        navigatorStyle: {},
+                        navigatorButtons: {}
+                    },
+            });
+            return;
+            case 'after-login':
+                Navigation.startTabBasedApp({
+                    tabs: [{
+                            label: 'Phone',
+                            screen: 'IPCMobile.Phone',
+                            //icon: require('./img/checkmark.png'),
+                            //selectedIcon: require('./img/checkmark.png'),
+                            title: 'Phone',
+                            overrideBackPress: false, //this can be turned to true for android
+                            navigatorStyle: {}
+                        },
+                        {
+                            label: 'Settings',
+                            screen: 'IPCMobile.Forwards',
+                            //icon: require('./img/checkmark.png'),
+                            //selectedIcon: require('./img/checkmark.png'),
+                            title: 'Settings',
+                            navigatorStyle: {}
+                        }
+
+                    ],
+                });
+                return;
+            default: //no root found
+        }
     }
 }
-
-const mapStateToProps = state => ({ nav: state.nav, auth: state.auth });
-
-export default connect(mapStateToProps)(AppWithNavigationState);

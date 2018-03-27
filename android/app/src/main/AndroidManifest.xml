@@ -51,7 +51,7 @@
                 <category android:name="${applicationId}" />
             </intent-filter>
         </receiver>
-        
+
         <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" />
         <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver">
             <intent-filter>

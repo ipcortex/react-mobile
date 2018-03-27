@@ -7,7 +7,6 @@ import React, { Component } from 'react';
 import { ListView, Platform, StyleSheet, Text, ScrollView, TouchableHighlight, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { connect } from 'react-redux';
-import { NavigationActions } from 'react-navigation';
 import PropTypes from 'prop-types';
 
 import {
