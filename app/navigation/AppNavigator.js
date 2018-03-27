@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { addNavigationHelpers, StackNavigator, TabNavigator} from 'react-navigation';
+import { addNavigationHelpers, StackNavigator, TabNavigator, createBottomTabNavigator } from 'react-navigation';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { LoginScreen } from '../screens/LoginScreen';
@@ -42,6 +42,36 @@ const nestedNav = TabNavigator(
 
 );
 
+/*
+const TabNav = createBottomTabNavigator(
+  {
+    MainTab: {
+      screen: PhoneScreen,
+      navigationOptions: {
+        title: 'Welcome',
+        tabBarLabel: 'Home',
+        tabBarIcon: ({ tintColor, focused }) => (
+          <Icon name="phone" />
+        ),
+      },
+    },
+    SettingsTab: {
+      screen: ForwardScreen,
+      navigationOptions: {
+        title: 'Settings',
+        tabBarIcon: ({ tintColor, focused }) => (
+          <Icon name="settings" />
+        ),
+      },
+    },
+  },
+  {
+    tabBarPosition: 'bottom',
+    animationEnabled: false,
+    swipeEnabled: false,
+  }
+);
+*/
 export const AppNavigator = StackNavigator({
     Home: {
         screen: nestedNav,
