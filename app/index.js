@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import {AppRegistry, Platform } from 'react-native';
-import {createStore, applyMiddleware, combineReducers} from "redux";
+import React, { Component } from 'react';
+import { AppRegistry, Platform } from 'react-native';
+import { createStore, applyMiddleware, combineReducers } from "redux";
 
 import { Provider } from "react-redux";
 
@@ -8,8 +8,8 @@ import { Navigation } from 'react-native-navigation';
 
 import registerScreens from './screens';
 
-//import { persistStore } from 'redux-persist'
-//import { PersistGate } from 'redux-persist/integration/react'
+import { persistStore } from 'redux-persist'
+import { PersistGate } from 'redux-persist/integration/react'
 
 import pushNotification from './lib/pushNotification';
 
@@ -20,10 +20,10 @@ import thunk from "redux-thunk";
 
 const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
 const store = createStoreWithMiddleware(
-  AppReducer,
+    AppReducer,
 );
 
-//const persistor = persistStore(store);
+var persistor;
 
 registerScreens(store, Provider);
 
@@ -49,11 +49,16 @@ export default class IPCMobile extends Component {
     constructor(props) {
         super(props);
         store.subscribe(this.onStoreUpdate.bind(this));
-        store.dispatch(appActions.appInitialized());
+        // Dont fire our first event until we are sure the redux
+        // persistent store is re-hydrated
+        persistor = persistStore(store, null, () => {
+            store.dispatch(actions.Logout);
+        });
     }
 
     onStoreUpdate() {
-        let { root } = store.getState().root;
+        let { root } = store.getState()
+            .nav;
         // handle a root change
         if(this.currentRoot != root) {
             this.currentRoot = root;
@@ -64,15 +69,15 @@ export default class IPCMobile extends Component {
     startApp(root) {
         switch(root) {
             case 'login':
-            Navigation.startSingleScreenApp({
-                        screen: {
+                Navigation.startSingleScreenApp({
+                    screen: {
                         screen: 'IPCMobile.Login',
                         title: 'Login',
                         navigatorStyle: {},
                         navigatorButtons: {}
                     },
-            });
-            return;
+                });
+                return;
             case 'after-login':
                 Navigation.startTabBasedApp({
                     tabs: [{
@@ -86,7 +91,7 @@ export default class IPCMobile extends Component {
                         },
                         {
                             label: 'Settings',
-                            screen: 'IPCMobile.Forwards',
+                            screen: 'IPCMobile.Forward',
                             //icon: require('./img/checkmark.png'),
                             //selectedIcon: require('./img/checkmark.png'),
                             title: 'Settings',

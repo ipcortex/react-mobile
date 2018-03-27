@@ -20,13 +20,13 @@ class LoginScreen extends React.Component {
     title: `${ Platform.OS } App Login`
   };
   static propTypes = {
-    navigation: PropTypes.object.isRequired
+    navigation: PropTypes.object
 
   };
 
   render() {
     return ( <View style={styles.container}>
-      <LoginWidget dispatch = {this.props.navigation.dispatch}/>
+      <LoginWidget/>
     </View> );
   }
 }

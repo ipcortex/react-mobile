@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Button, Icon } from 'react-native-material-ui';
 
-import { styles } from '../config/styles.js';
+import { styles, uiTheme } from '../config/styles.js';
 
 
 export default class PhoneNumber extends Component {

@@ -44,7 +44,7 @@ if(localAPIBuild) {
 }
 // We use this variable within the module closure to provide a single load
 // of the API state for effciency.
-var state = { WebRTC, IPCortex: {}, PBX: {}, Auth: {}, JsSIP };
+var state = { WebRTC, IPCortex: global.IPCortex, PBX: global.IPCortex.PBX, Auth: {}, JsSIP: global.JsSIP };
 
 /**
  * Class to load IPCortex API dynamically in a React [Native] environment
@@ -221,6 +221,8 @@ class IPCortexAPI {
      * @return {Promise}                  resolves when request is complete
      */
     async sendNotificationToken(token) {
+        if(token == null)
+            return;
         if(this.haveSetServer) {
             let response = await fetch(`${IPCortexConfig.proxy}/server/token/${token.os}/${token.token}`);
             if(response.status == 200) {

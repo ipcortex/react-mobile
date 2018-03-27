@@ -25,7 +25,7 @@ import InCallManager from 'react-native-incall-manager';
 
 import PhoneNumber from '../components/PhoneNumber';
 
-import { styles } from '../config/styles.js';
+import { styles, uiTheme } from '../config/styles.js';
 import { actions } from '../reducers';
 
 var JsSIP, IPCortex;

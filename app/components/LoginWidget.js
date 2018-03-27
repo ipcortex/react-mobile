@@ -104,8 +104,7 @@ class LoginWidget extends Component {
         if(!this.props.target || this.props.target === '')
             this.props.dispatch(actions.invalidateTarget);
         else if(this.props.target &&
-            this.props.target != '' &&
-            !this.IPCortex.isLoaded) {
+            this.props.target != '') {
             this.props.dispatch(actions.invalidateTarget);
             this.IPCortex.loadAPI(this.props.target)
                 .then((hostname) => {
@@ -115,6 +114,7 @@ class LoginWidget extends Component {
                     this.setState({ apiError: err.toString() });
                 });
         }
+
 
 
     }

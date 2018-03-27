@@ -10,7 +10,7 @@ import {
 import Phone from '../components/Phone';
 import { actions } from '../reducers';
 
-import { styles } from '../config/styles.js';
+import { styles, uiTheme, ThemeProvider } from '../config/styles.js';
 
 class PhoneScreen extends React.Component {
   static logged_in = 0;
@@ -22,9 +22,11 @@ class PhoneScreen extends React.Component {
 
 
   render() {
-    return ( <View style={styles.container}>
+    return ( <ThemeProvider uiTheme={uiTheme}>
+        <View style={styles.container}>
         <Phone />
-    </View> );
+    </View>
+</ThemeProvider> );
   }
 }
 
