@@ -7,7 +7,7 @@ import { compose, createStore, applyMiddleware } from 'redux';
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
 
-import pushNotification from 'lib/pushNotification';
+import pushNotification from './lib/pushNotification';
 
 import AppReducer, { actions } from './reducers';
 import AppWithNavigationState from './navigation/AppNavigator';
@@ -22,7 +22,7 @@ const store = createStore(
 const persistor = persistStore(store);
 
 
-var notification = new (store.dispatch, actions.notificationToken.token, actions.Phone);
+var notification = new pushNotification(store.dispatch, actions.notificationToken.token, actions.Phone);
 // This needs to be here as it has to initialise
 //  when the app is launched in background mode which
 //  doesn't start the React lifecycle. Any deeper in the

@@ -32,13 +32,13 @@ class pushNotification {
         // (optional) Called when Token is generated (iOS and Android)
         onRegister: ({ token, os }) => {
           console.log('onregister: ', token, os)
-          store.dispatch(actions.notificationToken.token({ token, os }));
+          this.dispatch(this.registerAction({ token, os }));
         },
 
         // (required) Called when a remote or local notification is opened or received
         onNotification: (notification) => {
           console.log('notification', notification)
-          store.dispatch(actions.Phone);
+          this.dispatch(this.notificationAction);
         },
 
         // ANDROID ONLY: (optional) GCM Sender ID.
@@ -54,7 +54,7 @@ class pushNotification {
         // Should the initial notification be popped automatically
         // default: true
         // Leave this off unless you have good reason.
-        popInitialNotification: true,
+        popInitialNotification: false,
 
         requestPermissions: true
       });

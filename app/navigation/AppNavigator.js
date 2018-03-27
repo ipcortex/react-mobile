@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { addNavigationHelpers, StackNavigator } from 'react-navigation';
+import { addNavigationHelpers, StackNavigator, TabNavigator} from 'react-navigation';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { LoginScreen } from '../screens/LoginScreen';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -10,42 +11,64 @@ import { ForwardScreen } from '../screens/ForwardScreen';
 import { NightModeScreen } from '../screens/NightModeScreen';
 import { addListener } from '../utils/redux';
 
-export const AppNavigator = StackNavigator( {
 
-  Home: {
-    screen: HomeScreen
-  },
-  Forward: {
-    screen: ForwardScreen
-  },
-  NightMode: {
-    screen: NightModeScreen
+const nestedNav = TabNavigator(
+{
+    Phone: {
+        screen: PhoneScreen,
+        navigationOptions: {
+            title: 'Phone',
+            tabBarLabel: 'Phone',
+            tabBarIcon: ({ tintColor, focused }) => (
+                <Icon name="phone" />
+            ),
+        },
+    },
+    Forward: {
+        screen: ForwardScreen,
+        navigationOptions: {
+            title: 'Forwards',
+            tabBarIcon: ({ tintColor, focused }) => (
+                <Icon name="settings" />
+            ),
+        },
+    },
 },
-Login: {
-  screen: LoginScreen
-},
-Phone: {
-  screen: PhoneScreen
-},
-
-} );
-
-class AppWithNavigationState extends React.Component {
-  static propTypes = {
-    dispatch: PropTypes.func.isRequired,
-    nav: PropTypes.object.isRequired,
-    auth: PropTypes.object.isRequired,
-  };
-
-  render() {
-    const { dispatch, nav, auth } = this.props;
-    return ( <AppNavigator
-        navigation={addNavigationHelpers( { dispatch, state: nav, addListener } )}
-        screenProps={{dispatch, auth}}
-    /> );
-  }
+{
+  tabBarPosition: 'bottom',
+  animationEnabled: false,
+  swipeEnabled: false,
 }
 
-const mapStateToProps = state => ( { nav: state.nav, auth: state.auth } );
+);
 
-export default connect( mapStateToProps )( AppWithNavigationState );
+export const AppNavigator = StackNavigator({
+    Home: {
+        screen: nestedNav,
+    },
+    Login: {
+        screen: LoginScreen
+    }
+});
+
+
+
+class AppWithNavigationState extends React.Component {
+    static propTypes = {
+        dispatch: PropTypes.func.isRequired,
+        nav: PropTypes.object.isRequired,
+        auth: PropTypes.object.isRequired,
+    };
+
+    render() {
+        const { dispatch, nav, auth } = this.props;
+        return(<AppNavigator
+        navigation={addNavigationHelpers( { dispatch, state: nav, addListener } )}
+        screenProps={{dispatch, auth}}
+    />);
+    }
+}
+
+const mapStateToProps = state => ({ nav: state.nav, auth: state.auth });
+
+export default connect(mapStateToProps)(AppWithNavigationState);

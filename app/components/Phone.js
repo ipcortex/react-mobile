@@ -168,7 +168,7 @@ class Phone extends Component {
     initAPI() {
         // Called when we know we are logged in so should have an IPCortex API
         // with an owned softphone at this point.
-        if(this.IPCortex.PBX) {
+        if(this.IPCortex.PBX && this.IPCortex.PBX.owned && this.IPCortex.PBX.owned[0]) {
             // TODO: More error checking (plus just how many places do we stash
             // IPCortex and JsSIP objects??)
             JsSIP = this.IPCortex.JsSIP;
@@ -228,7 +228,7 @@ class Phone extends Component {
                 }
             });
         } else {
-            throw 'IPCortex API not loaded when trying to start Phone';
+            //throw 'IPCortex API not loaded when trying to start Phone';
         }
     }
 
