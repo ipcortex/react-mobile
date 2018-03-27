@@ -1,5 +1,3 @@
-import { AppNavigator } from '../navigation/AppNavigator';
-
 const initialNavState = { root: 'login' }
 
 import { actions as authActions } from './auth';
