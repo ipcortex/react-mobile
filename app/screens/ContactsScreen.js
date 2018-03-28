@@ -7,7 +7,8 @@ import {
   Text
 } from 'react-native';
 
-import { actions } from '../reducers';
+import ContactsList from '../components/ContactsList';
+
 import { styles, uiTheme, ThemeProvider } from '../config/styles.js';
 
 class ContactsScreen extends React.Component {
@@ -15,7 +16,7 @@ class ContactsScreen extends React.Component {
     return (
       <ThemeProvider uiTheme={uiTheme}>
         <View style={styles.container}>
-          <Text>Hello Contacts</Text>
+          <ContactsList />
         </View>
       </ThemeProvider>
     );
