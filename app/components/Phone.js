@@ -241,7 +241,7 @@ class Phone extends Component {
     render() {
         //TODO: Styling!!!
         return(<View style={styles.container}>
-        <PhoneNumber title="Phone" icon="phone" onChange={(number) => {this.setState({dialNumber: number})}}/>
+        <PhoneNumber onChange={(number) => {this.setState({dialNumber: number})}}/>
         <RTCView streamURL={this.state.videoURL}/>
         <Text>Call State is {this.state.callState}</Text>
                             <PhoneButton

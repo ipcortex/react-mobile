@@ -1,7 +1,10 @@
 import { Navigation } from 'react-native-navigation';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LoginScreen } from './LoginScreen';
 import { PhoneScreen } from './PhoneScreen';
 import { ForwardScreen } from './ForwardScreen';
+
+var phoneIcon, settingsIcon;
 /**
  * Implements react-native-navigation screen layout for this app.
  *
@@ -14,11 +17,17 @@ import { ForwardScreen } from './ForwardScreen';
  * @param  {[type]}     store    redux store
  * @param  {[type]}     Provider redux Provider
  */
-function registerScreens(store, Provider) {
-  Object.assign(this, { store, Provider });
+async function registerScreens(store, Provider) {
+
+  phoneIcon = await Icon.getImageSource('phone', 30);
+  settingsIcon = await Icon.getImageSource('settings', 30);
+
   Navigation.registerComponent('IPCMobile.Login', () => LoginScreen, store, Provider);
   Navigation.registerComponent('IPCMobile.Phone', () => PhoneScreen, store, Provider);
   Navigation.registerComponent('IPCMobile.Forward', () => ForwardScreen, store, Provider);
+
+  return(true);
+
 }
 
 /**
@@ -44,8 +53,8 @@ function switchContext(context) {
       tabs: [{
           label: 'Phone',
           screen: 'IPCMobile.Phone',
-          //icon: require('./img/checkmark.png'),
-          //selectedIcon: require('./img/checkmark.png'),
+          icon: phoneIcon,
+          selectedIcon: phoneIcon,
           title: 'Phone',
           overrideBackPress: false, //this can be turned to true for android
           navigatorStyle: {}
@@ -53,8 +62,8 @@ function switchContext(context) {
         {
           label: 'Settings',
           screen: 'IPCMobile.Forward',
-          //icon: require('./img/checkmark.png'),
-          //selectedIcon: require('./img/checkmark.png'),
+          icon: settingsIcon,
+          selectedIcon: settingsIcon,
           title: 'Settings',
           navigatorStyle: {}
         }

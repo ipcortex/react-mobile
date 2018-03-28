@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component} from 'react';
 import { AppRegistry, Platform } from 'react-native';
 import { createStore, applyMiddleware, combineReducers } from "redux";
 
@@ -10,6 +10,7 @@ import { registerScreens, switchContext } from './screens';
 
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
+
 
 import pushNotification from './lib/pushNotification';
 
@@ -25,8 +26,8 @@ const store = createStoreWithMiddleware(
 
 var persistor;
 
-registerScreens(store, Provider);
-
+if(Platform.OS === 'android')
+    persistor = persistStore(store);
 
 var notification = new pushNotification(store.dispatch, actions.notificationToken.token, actions.Phone);
 // This needs to be here as it has to initialise
@@ -46,13 +47,20 @@ notification.register();
 export default class IPCMobile extends Component {
     constructor(props) {
         super(props);
-
-        // Dont fire our first event until we are sure the redux
-        // persistent store is re-hydrated
-        persistor = persistStore(store, null, () => {
-            store.subscribe(this.onStoreUpdate.bind(this));
-            store.dispatch(actions.Logout);
-        });
+        registerScreens(store, Provider)
+            .then(() => {
+                if(Platform.OS === 'ios') {
+                    // Dont fire our first event until we are sure the redux
+                    // persistent store is re-hydrated
+                    persistor = persistStore(store, null, () => {
+                        store.subscribe(this.onStoreUpdate.bind(this));
+                        store.dispatch(actions.Logout);
+                    });
+                } else {
+                    store.subscribe(this.onStoreUpdate.bind(this));
+                    store.dispatch(actions.Logout);
+                }
+            })
     }
 
     onStoreUpdate() {
