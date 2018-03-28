@@ -7,7 +7,6 @@ import React, { Component } from 'react';
 import { ListView, Platform, StyleSheet, Text, ScrollView, TouchableHighlight, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { connect } from 'react-redux';
-import { NavigationActions } from 'react-navigation';
 import PropTypes from 'prop-types';
 
 import {
@@ -26,7 +25,7 @@ import InCallManager from 'react-native-incall-manager';
 
 import PhoneNumber from '../components/PhoneNumber';
 
-import { styles } from '../config/styles.js';
+import { styles, uiTheme } from '../config/styles.js';
 import { actions } from '../reducers';
 
 var JsSIP, IPCortex;
@@ -168,7 +167,7 @@ class Phone extends Component {
     initAPI() {
         // Called when we know we are logged in so should have an IPCortex API
         // with an owned softphone at this point.
-        if(this.IPCortex.PBX) {
+        if(this.IPCortex.PBX && this.IPCortex.PBX.owned && this.IPCortex.PBX.owned[0]) {
             // TODO: More error checking (plus just how many places do we stash
             // IPCortex and JsSIP objects??)
             JsSIP = this.IPCortex.JsSIP;
@@ -228,7 +227,7 @@ class Phone extends Component {
                 }
             });
         } else {
-            throw 'IPCortex API not loaded when trying to start Phone';
+            //throw 'IPCortex API not loaded when trying to start Phone';
         }
     }
 

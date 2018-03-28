@@ -1,4 +1,4 @@
-import { AppNavigator } from '../navigation/AppNavigator';
+
 
 const initialAuthState = { isLoggedIn: false, targetValid: false };
 

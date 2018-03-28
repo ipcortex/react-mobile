@@ -104,8 +104,7 @@ class LoginWidget extends Component {
         if(!this.props.target || this.props.target === '')
             this.props.dispatch(actions.invalidateTarget);
         else if(this.props.target &&
-            this.props.target != '' &&
-            !this.IPCortex.isLoaded) {
+            this.props.target != '') {
             this.props.dispatch(actions.invalidateTarget);
             this.IPCortex.loadAPI(this.props.target)
                 .then((hostname) => {
@@ -115,6 +114,7 @@ class LoginWidget extends Component {
                     this.setState({ apiError: err.toString() });
                 });
         }
+
 
 
     }
@@ -130,7 +130,7 @@ class LoginWidget extends Component {
                 .catch((err) => {
                     this.props.dispatch(actions.setLoginToken.token(null));
                 });
-        else (newProps.notificationToken != this.props.notificationToken)
+        else (newProps.notificationToken != null && newProps.notificationToken != this.props.notificationToken)
             this.IPCortex.sendNotificationToken(newProps.notificationToken);
     }
     /**
@@ -178,7 +178,7 @@ class LoginWidget extends Component {
      */
     async do_login(credentials) {
         try {
-            this.IPCortex.setServer(this.props.target, credentials.username)
+            await this.IPCortex.setServer(this.props.target, credentials.username)
 
             await this.IPCortex.PBX.Auth.login(Object.assign({
                 notoken: false,

@@ -9,12 +9,13 @@ const sensitiveStorage = createSensitiveStorage({
 const mainPersistConfig = {
   key: "IPCortex",
   storage: AsyncStorage,
-  blacklist: ["someEphemeralKey"]
+  timeout: 1000
 };
 
 const sensitivePersistConfig = {
   key: "auth",
-  storage: sensitiveStorage
+  storage: sensitiveStorage,
+  timeout: 1000
 };
 
 
