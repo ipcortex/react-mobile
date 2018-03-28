@@ -48,10 +48,11 @@ notification.register();
 export default class IPCMobile extends Component {
     constructor(props) {
         super(props);
-        store.subscribe(this.onStoreUpdate.bind(this));
+
         // Dont fire our first event until we are sure the redux
         // persistent store is re-hydrated
         persistor = persistStore(store, null, () => {
+            store.subscribe(this.onStoreUpdate.bind(this));
             store.dispatch(actions.Logout);
         });
     }
