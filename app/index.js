@@ -6,7 +6,7 @@ import { Provider } from "react-redux";
 
 import { Navigation } from 'react-native-navigation';
 
-import registerScreens from './screens';
+import { registerScreens, switchContext } from './screens';
 
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -37,8 +37,6 @@ var notification = new pushNotification(store.dispatch, actions.notificationToke
 //  notifications
 notification.register();
 
-
-
 /**
  * IPCMobile root React Native Component
  *
@@ -68,42 +66,7 @@ export default class IPCMobile extends Component {
     }
 
     startApp(root) {
-        switch(root) {
-            case 'login':
-                Navigation.startSingleScreenApp({
-                    screen: {
-                        screen: 'IPCMobile.Login',
-                        title: 'Login',
-                        navigatorStyle: {},
-                        navigatorButtons: {}
-                    },
-                });
-                return;
-            case 'after-login':
-                Navigation.startTabBasedApp({
-                    tabs: [{
-                            label: 'Phone',
-                            screen: 'IPCMobile.Phone',
-                            //icon: require('./img/checkmark.png'),
-                            //selectedIcon: require('./img/checkmark.png'),
-                            title: 'Phone',
-                            overrideBackPress: false, //this can be turned to true for android
-                            navigatorStyle: {}
-                        },
-                        {
-                            label: 'Settings',
-                            screen: 'IPCMobile.Forward',
-                            //icon: require('./img/checkmark.png'),
-                            //selectedIcon: require('./img/checkmark.png'),
-                            title: 'Settings',
-                            navigatorStyle: {}
-                        }
-
-                    ],
-                });
-                return;
-            default: //no root found
-        }
+        switchContext(root);
     }
 }
 
