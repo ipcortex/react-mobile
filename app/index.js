@@ -1,4 +1,4 @@
-import React, { Component} from 'react';
+import React, { Component } from 'react';
 import { AppRegistry, Platform } from 'react-native';
 import { createStore, applyMiddleware, combineReducers } from "redux";
 
@@ -29,15 +29,19 @@ var persistor;
 if(Platform.OS === 'android')
     persistor = persistStore(store);
 
-var notification = new pushNotification(store.dispatch, actions.notificationToken.token, actions.Phone);
+var notification = new pushNotification(store.dispatch,
+    actions.notificationToken.token,
+    actions.Phone);
 // This needs to be here as it has to initialise
 //  when the app is launched in background mode which
 //  doesn't start the React lifecycle. Any deeper in the
 //  project and onNotification isn't primed to fire when
 //  the app is (re)started which means we don't process background
 //  notifications
-notification.register();
-
+notification.register({
+    Accept: function() { store.dispatch({type: actions.AcceptCall}) },
+    Reject: function() { store.dispatch({type: actions.RejectCall}) },
+});
 /**
  * IPCMobile root React Native Component
  *
@@ -61,6 +65,7 @@ export default class IPCMobile extends Component {
                     store.dispatch(actions.Logout);
                 }
             })
+
     }
 
     onStoreUpdate() {
@@ -74,8 +79,11 @@ export default class IPCMobile extends Component {
     }
 
     startApp(root) {
+
         switchContext(root);
+
     }
+
 }
 
 AppRegistry.registerComponent('IPCMobile', () => IPCMobile);

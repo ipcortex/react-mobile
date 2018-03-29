@@ -1,4 +1,6 @@
 import PushNotification from 'react-native-push-notification';
+import PushNotificationAndroid from 'react-native-push-notification';
+import { DeviceEventEmitter } from 'react-native';
 import InCallManager from 'react-native-incall-manager';
 import config from '../config/private';
 
@@ -17,7 +19,6 @@ class pushNotification {
    */
   constructor(dispatch, registerAction, notificationAction) {
     Object.assign(this, { dispatch, registerAction, notificationAction });
-
   }
 
   /**
@@ -26,9 +27,26 @@ class pushNotification {
    * @method register
    * @return {[type]} Return value from react-native-push-notification configure
    */
-  register() {
-    return PushNotification.configure({
+  register(listners = null) {
+    console.log('registering', listners);
+    this.listners = listners;
+    if(this.listners != null) {
+      console.log(`registering listners for: ${Object.keys(this.listners)}`);
+      PushNotificationAndroid.registerNotificationActions(Object.keys(this.listners))
+      DeviceEventEmitter.addListener('notificationActionReceived', (action) => {
+        console.log('Notification action received: ' + action);
+        const info = JSON.parse(action.dataJSON);
+        Object.keys(this.listners)
+          .forEach((l) => {
+            if(info.action == l) {
+              console.log(`firing ${l} action`)
+              this.listners[l]();
+            }
+          });
+      })
+    }
 
+    return PushNotification.configure({
       // (optional) Called when Token is generated (iOS and Android)
       onRegister: ({ token, os }) => {
         console.log('onregister: ', token, os)
@@ -55,12 +73,12 @@ class pushNotification {
           ongoing: false, // (optional) set whether this is an "ongoing" notification
 
           /* iOS only properties */
-          alertAction: 'slide to accept',// (optional) default: view
-            category: 'accept',// (optional) default: null
-            userInfo: `${notification.data.CLI}`,// (optional) default: null (object containing additional notification data)
+          alertAction: 'slide to accept', // (optional) default: view
+          category: 'accept', // (optional) default: null
+          userInfo: `${notification.data.CLI}`, // (optional) default: null (object containing additional notification data)
 
-            /* iOS and Android properties */
-            title: 'IPCortex Phone', // (optional)
+          /* iOS and Android properties */
+          title: 'IPCortex Phone', // (optional)
           message: `Incoming Call from ${notification.data.CLI}`, // (required)
           playSound: false, // (optional) default: true
           soundName: 'default', // (optional) Sound to play when the notification is shown. Value of 'default' plays the default sound. It can be set to a custom sound such as 'android.resource://com.xyz/raw/my_sound'. It will look for the 'my_sound' audio file in 'res/raw' directory and play it. default: 'default' (default sound is played)
@@ -68,7 +86,7 @@ class pushNotification {
           //repeatType: 'day', // (Android only) Repeating interval. Could be one of `week`, `day`, `hour`, `minute, `time`. If specified as time, it should be accompanied by one more parameter 'repeatTime` which should the number of milliseconds between each interval
           actions: '["Accept", "Reject"]', // (Android only) See the doc for notification actions to know more
         });
-        this.dispatch(this.notificationAction);
+        //this.dispatch(this.notificationAction);
       },
 
       // ANDROID ONLY: (optional) GCM Sender ID.
