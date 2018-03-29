@@ -19,7 +19,7 @@ let phoneIcon, settingsIcon, peopleIcon;
  * @param  {[type]}     Provider redux Provider
  */
 async function registerScreens(store, Provider) {
-
+try{
   phoneIcon = await Icon.getImageSource('phone', 30);
   settingsIcon = await Icon.getImageSource('settings', 30);
   peopleIcon = await Icon.getImageSource('account-multiple', 30);
@@ -30,6 +30,13 @@ async function registerScreens(store, Provider) {
   Navigation.registerComponent('IPCMobile.Contacts', () => ContactsScreen, store, Provider);
 
   return(true);
+
+}
+catch (e) {
+    console.log (e)
+}
+
+
 
 }
 
