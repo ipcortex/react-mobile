@@ -5,7 +5,8 @@ import {
   StyleSheet,
   FlatList,
   View,
-  Text
+  Text,
+  RefreshControl
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connect} from 'react-redux';
@@ -19,28 +20,43 @@ import {styles, uiTheme} from '../config/styles.js';
 class ContactsList extends Component {
   constructor(props) {
     super(props);
+    this.state = {refreshing: false};
     this.IPCortex = new IPCortexAPI();
     this.loadContacts = this.loadContacts.bind(this);
+    this.renderIndividualContact = this.renderIndividualContact.bind(this);
+    this.onRefresh = this.onRefresh.bind(this);
     if (props.isLoggedIn) {
       this.loadContacts();
     }
   }
   loadContacts() {
-    this.props.addContacts(
-      this.IPCortex.PBX.contacts.map(this.mapContact)
-    );
-    this.IPCortex.PBX.contacts.forEach(contact => {
-      contact.addListener('update', contact => {
-        this.props.updateContact(this.mapContact(contact));
+    return new Promise(resolve => {
+      this.IPCortex.PBX.getAddressbook((contacts) => {
+        this.props.addContacts(
+          contacts.map(this.mapContact)
+        );
+        contacts.forEach(contact => {
+          contact.addListener('update', contact => {
+            this.props.updateContact(this.mapContact(contact));
+          });
+        });
+        resolve();
       });
+    });
+  }
+  onRefresh() {
+    this.setState({refreshing: true});
+    this.loadContacts().then(() => {
+      this.setState({refreshing: false});
     });
   }
   mapContact(contact) {
     return {
-      key: contact.cID+'',
+      key: contact.key+'',
       name: contact.name,
       blf: contact.blf,
-      state: contact.canCall ? 'online' : 'offline'
+      state: contact.canCall ? 'online' : 'offline',
+      number: contact.number
     };
   }
   componentWillReceiveProps(newProps) {
@@ -51,7 +67,7 @@ class ContactsList extends Component {
   }
   renderIndividualContact({item}) {
     return (
-      <Contact contact={item} />
+      <Contact contact={item} dial={this.props.dial(item.number)}/>
     );
   }
   render() {
@@ -60,6 +76,8 @@ class ContactsList extends Component {
         <FlatList 
           data={this.props.contacts}
           renderItem={this.renderIndividualContact}
+          onRefresh={this.onRefresh}
+          refreshing={this.state.refreshing}
         />
       </View>
     );
@@ -72,7 +90,8 @@ const mapStateToProps = state => ({
 });
 const mapDispatchToProps = dispatch => ({
   addContacts: (contacts) => dispatch({type: actions.AddContacts, contacts}),
-  updateContact: (contact) => dispatch({type: actions.UpdateContact, contact})
+  updateContact: (contact) => dispatch({type: actions.UpdateContact, contact}),
+  dial: (number) => () => dispatch({type: actions.Dial, number})
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ContactsList);

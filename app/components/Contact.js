@@ -4,7 +4,8 @@ import {
   Platform,
   StyleSheet,
   View,
-  Text
+  Text,
+  TouchableHighlight
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -15,26 +16,28 @@ const iconColors = {
   "dnd": "#e09131"
 };
 
-export default function Contact({contact}) {
+export default function Contact({contact, dial}) {
   return (
-    <View style={{
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 25,
-      paddingVertical: 3
-    }}>
-      <Text>{contact.name}</Text>
-      <Icon
-        name={phoneIcons[contact.blf]}
-        style={{
-          backgroundColor: iconColors[contact.state] || "#d1312b",
-          color: 'white',
-          borderRadius: 5,
-          padding: 2
-        }}
-      />
-    </View>
+    <TouchableHighlight onPress={dial}>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 25,
+          paddingVertical: 3
+        }}>
+        <Text>{contact.name}</Text>
+        <Icon
+          name={phoneIcons[contact.blf]}
+          style={{
+            backgroundColor: iconColors[contact.state] || "#d1312b",
+            color: 'white',
+            borderRadius: 5,
+            padding: 2
+          }}
+        />
+      </View>
+    </TouchableHighlight>
   );
 };
 
