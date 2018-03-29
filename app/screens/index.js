@@ -18,15 +18,20 @@ var phoneIcon, settingsIcon;
  * @param  {[type]}     Provider redux Provider
  */
 async function registerScreens(store, Provider) {
-
+try{
   phoneIcon = await Icon.getImageSource('phone', 30);
   settingsIcon = await Icon.getImageSource('settings', 30);
-
   Navigation.registerComponent('IPCMobile.Login', () => LoginScreen, store, Provider);
   Navigation.registerComponent('IPCMobile.Phone', () => PhoneScreen, store, Provider);
   Navigation.registerComponent('IPCMobile.Forward', () => ForwardScreen, store, Provider);
-
   return(true);
+
+}
+catch (e) {
+    console.log (e)
+}
+
+
 
 }
 
