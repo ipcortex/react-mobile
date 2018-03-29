@@ -9,6 +9,11 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const phoneIcons = ["phone-hangup", "phone", "phone-in-talk", "phone-incoming"];
+const iconColors = {
+  "online": "#00bb00",
+  "away": "#e09131",
+  "dnd": "#e09131"
+};
 
 export default function Contact({contact}) {
   return (
@@ -21,9 +26,9 @@ export default function Contact({contact}) {
     }}>
       <Text>{contact.name}</Text>
       <Icon
-        name={phoneIcons[contact.state]}
+        name={phoneIcons[contact.blf]}
         style={{
-          backgroundColor: "#00aa00",
+          backgroundColor: iconColors[contact.state] || "#d1312b",
           color: 'white',
           borderRadius: 5,
           padding: 2

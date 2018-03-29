@@ -27,21 +27,21 @@ class ContactsList extends Component {
   }
   loadContacts() {
     this.props.addContacts(
-      this.IPCortex.PBX.contacts.map(contact => ({
-        key: contact.cID+'',
-        name: contact.name,
-        state: contact.blf
-      }))
+      this.IPCortex.PBX.contacts.map(this.mapContact)
     );
     this.IPCortex.PBX.contacts.forEach(contact => {
       contact.addListener('update', contact => {
-        this.props.updateContact({
-          key: contact.cID+'',
-          name: contact.name,
-          state: contact.blf
-        });
+        this.props.updateContact(this.mapContact(contact));
       });
     });
+  }
+  mapContact(contact) {
+    return {
+      key: contact.cID+'',
+      name: contact.name,
+      blf: contact.blf,
+      state: contact.canCall ? 'online' : 'offline'
+    };
   }
   componentWillReceiveProps(newProps) {
     // If we weren't logged in and now are
