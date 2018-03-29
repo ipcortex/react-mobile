@@ -3,12 +3,11 @@ import React, {Component} from 'react';
 import {
   Platform,
   StyleSheet,
-  FlatList,
+  SectionList,
   View,
   Text,
   RefreshControl
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connect} from 'react-redux';
 
 import Contact from './Contact';
@@ -73,11 +72,23 @@ class ContactsList extends Component {
       number: contact.number
     };
   }
+  alphabetise(contacts) {
+    return contacts.reduce((sections, contact) => {
+      const contactFirstLetter = contact.name.substr(0, 1).toUpperCase();
+      const sectionIndex = sections.findIndex((section) => section.title == contactFirstLetter);
+      if (sectionIndex >= 0) sections[sectionIndex].data.push(contact);
+      else sections.push({title: contactFirstLetter, data: [contact]});
+      return sections;
+    }, []);
+  }
   componentWillReceiveProps(newProps) {
     // If we weren't logged in and now are
     if (newProps.isLoggedIn && !this.props.isLoggedIn) {
       this.loadContacts();
     }
+  }
+  renderSectionHeader({section}) {
+    return (<Text>{section.title}</Text>);
   }
   renderIndividualContact({item}) {
     return (
@@ -87,9 +98,10 @@ class ContactsList extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <FlatList 
-          data={this.props.contacts}
+        <SectionList 
+          sections={this.alphabetise(this.props.contacts)}
           renderItem={this.renderIndividualContact}
+          renderSectionHeader={this.renderSectionHeader}
           onRefresh={this.onRefresh}
           refreshing={this.state.refreshing}
         />
