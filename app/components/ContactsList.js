@@ -10,6 +10,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connect} from 'react-redux';
 
+import Contact from './Contact';
+
 import {IPCortexAPI} from '../lib/IPCortexAPI';
 import { actions } from '../reducers';
 import {styles, uiTheme} from '../config/styles.js';
@@ -17,10 +19,8 @@ import {styles, uiTheme} from '../config/styles.js';
 class ContactsList extends Component {
   constructor(props) {
     super(props);
-    this.phoneIcons = ["phone-hangup", "phone", "phone-in-talk", "phone-incoming"];
     this.IPCortex = new IPCortexAPI();
     this.loadContacts = this.loadContacts.bind(this);
-    this.renderIndividualContact = this.renderIndividualContact.bind(this);
     if (props.isLoggedIn) {
       this.loadContacts();
     }
@@ -51,22 +51,7 @@ class ContactsList extends Component {
   }
   renderIndividualContact({item}) {
     return (
-      <View style={{flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center'}}>
-        <Text>{item.name}</Text>
-        <Icon
-          name={this.phoneIcons[item.state]}
-          style={{
-            backgroundColor: "#00aa00",
-            color: 'white',
-            borderRadius: 3,
-            padding: 3,
-            marginHorizontal: 10,
-            marginVertical: 2
-          }}
-        />
-      </View>
+      <Contact contact={item} />
     );
   }
   render() {
