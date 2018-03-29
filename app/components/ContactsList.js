@@ -74,7 +74,7 @@ class ContactsList extends Component {
   }
   alphabetise(contacts) {
     return contacts.reduce((sections, contact) => {
-      const contactFirstLetter = contact.name.substr(0, 1).toUpperCase();
+      const contactFirstLetter = ((character) => isNaN(character) ? character.toUpperCase() : '123')(contact.name.substr(0, 1));
       const sectionIndex = sections.findIndex((section) => section.title == contactFirstLetter);
       if (sectionIndex >= 0) sections[sectionIndex].data.push(contact);
       else sections.push({title: contactFirstLetter, data: [contact]});
