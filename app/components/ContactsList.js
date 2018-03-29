@@ -3,12 +3,11 @@ import React, {Component} from 'react';
 import {
   Platform,
   StyleSheet,
-  FlatList,
+  SectionList,
   View,
   Text,
   RefreshControl
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connect} from 'react-redux';
 
 import Contact from './Contact';
@@ -23,6 +22,7 @@ class ContactsList extends Component {
     this.state = {refreshing: false};
     this.IPCortex = new IPCortexAPI();
     this.loadContacts = this.loadContacts.bind(this);
+    this.updateContacts = this.updateContacts.bind(this);
     this.renderIndividualContact = this.renderIndividualContact.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
     if (props.isLoggedIn) {
@@ -32,7 +32,6 @@ class ContactsList extends Component {
   loadContacts() {
     return new Promise(resolve => {
       this.IPCortex.PBX.getAddressbook((contacts) => {
-        // TODO: handle edited contacts and deleted ones
         this.props.addContacts(
           contacts.map(this.mapContact)
         );
@@ -45,9 +44,22 @@ class ContactsList extends Component {
       });
     });
   }
+  updateContacts() {
+    return new Promise(resolve => {
+      this.IPCortex.PBX.getAddressbook((added, removed) => {
+        added.forEach(contact => 
+          this.props.updateContact(this.mapContact(contact))
+        );
+        removed.forEach(key => 
+          this.props.deleteContact(key)
+        );
+        resolve();
+      });
+    });
+  }
   onRefresh() {
     this.setState({refreshing: true});
-    this.loadContacts().then(() => {
+    this.updateContacts().then(() => {
       this.setState({refreshing: false});
     });
   }
@@ -60,11 +72,23 @@ class ContactsList extends Component {
       number: contact.number
     };
   }
+  alphabetise(contacts) {
+    return contacts.reduce((sections, contact) => {
+      const contactFirstLetter = ((character) => isNaN(character) ? character.toUpperCase() : '123')(contact.name.substr(0, 1));
+      const sectionIndex = sections.findIndex((section) => section.title == contactFirstLetter);
+      if (sectionIndex >= 0) sections[sectionIndex].data.push(contact);
+      else sections.push({title: contactFirstLetter, data: [contact]});
+      return sections;
+    }, []);
+  }
   componentWillReceiveProps(newProps) {
     // If we weren't logged in and now are
     if (newProps.isLoggedIn && !this.props.isLoggedIn) {
       this.loadContacts();
     }
+  }
+  renderSectionHeader({section}) {
+    return (<Text>{section.title}</Text>);
   }
   renderIndividualContact({item}) {
     return (
@@ -74,9 +98,10 @@ class ContactsList extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <FlatList 
-          data={this.props.contacts}
+        <SectionList 
+          sections={this.alphabetise(this.props.contacts)}
           renderItem={this.renderIndividualContact}
+          renderSectionHeader={this.renderSectionHeader}
           onRefresh={this.onRefresh}
           refreshing={this.state.refreshing}
         />
@@ -92,6 +117,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   addContacts: (contacts) => dispatch({type: actions.AddContacts, contacts}),
   updateContact: (contact) => dispatch({type: actions.UpdateContact, contact}),
+  deleteContact: (key) => dispatch({type: actions.DeleteContact, key}),
   dial: (number) => () => dispatch({type: actions.Dial, number})
 });
 

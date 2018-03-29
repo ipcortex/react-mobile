@@ -19,22 +19,24 @@ const iconColors = {
 export default function Contact({contact, dial}) {
   return (
     <TouchableHighlight onPress={dial}>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingHorizontal: 25,
-          paddingVertical: 3
-        }}>
-        <Text>{contact.name}</Text>
+      <View style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 25,
+        paddingVertical: 3
+      }}>
+        <Text style={{
+          fontSize: 20
+        }}>{contact.name}</Text>
         <Icon
           name={phoneIcons[contact.blf]}
           style={{
             backgroundColor: iconColors[contact.state] || "#d1312b",
             color: 'white',
-            borderRadius: 5,
-            padding: 2
+            padding: 6
           }}
+          size={44}
         />
       </View>
     </TouchableHighlight>
