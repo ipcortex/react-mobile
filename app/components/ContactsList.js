@@ -32,6 +32,7 @@ class ContactsList extends Component {
   loadContacts() {
     return new Promise(resolve => {
       this.IPCortex.PBX.getAddressbook((contacts) => {
+        // TODO: handle edited contacts and deleted ones
         this.props.addContacts(
           contacts.map(this.mapContact)
         );
