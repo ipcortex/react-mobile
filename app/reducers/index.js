@@ -6,13 +6,15 @@ import {mainPersistConfig, sensitivePersistConfig} from '../config/storage';
 
 import authReducer, { actions as authActions } from './auth';
 import navReducer, { actions as navActions } from './nav';
+import contactsReducer, { actions as contactsActions } from './contacts';
 
 const AppReducer = combineReducers({
   nav: navReducer,
-  auth: persistReducer(sensitivePersistConfig, authReducer)
+  auth: persistReducer(sensitivePersistConfig, authReducer),
+  contacts: contactsReducer
 });
 
-const actions = Object.assign({}, authActions, navActions);
+const actions = Object.assign({}, authActions, navActions, contactsActions);
 
 export default AppReducer;
 export { actions } ;
