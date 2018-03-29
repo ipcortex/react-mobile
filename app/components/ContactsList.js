@@ -23,6 +23,7 @@ class ContactsList extends Component {
     this.state = {refreshing: false};
     this.IPCortex = new IPCortexAPI();
     this.loadContacts = this.loadContacts.bind(this);
+    this.updateContacts = this.updateContacts.bind(this);
     this.renderIndividualContact = this.renderIndividualContact.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
     if (props.isLoggedIn) {
@@ -32,7 +33,6 @@ class ContactsList extends Component {
   loadContacts() {
     return new Promise(resolve => {
       this.IPCortex.PBX.getAddressbook((contacts) => {
-        // TODO: handle edited contacts and deleted ones
         this.props.addContacts(
           contacts.map(this.mapContact)
         );
@@ -45,9 +45,22 @@ class ContactsList extends Component {
       });
     });
   }
+  updateContacts() {
+    return new Promise(resolve => {
+      this.IPCortex.PBX.getAddressbook((added, removed) => {
+        added.forEach(contact => 
+          this.props.updateContact(this.mapContact(contact))
+        );
+        removed.forEach(key => 
+          this.props.deleteContact(key)
+        );
+        resolve();
+      });
+    });
+  }
   onRefresh() {
     this.setState({refreshing: true});
-    this.loadContacts().then(() => {
+    this.updateContacts().then(() => {
       this.setState({refreshing: false});
     });
   }
@@ -92,6 +105,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   addContacts: (contacts) => dispatch({type: actions.AddContacts, contacts}),
   updateContact: (contact) => dispatch({type: actions.UpdateContact, contact}),
+  deleteContact: (key) => dispatch({type: actions.DeleteContact, key}),
   dial: (number) => () => dispatch({type: actions.Dial, number})
 });
 
