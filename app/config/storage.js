@@ -15,7 +15,8 @@ const mainPersistConfig = {
 const sensitivePersistConfig = {
   key: "auth",
   storage: sensitiveStorage,
-  timeout: 1000
+  timeout: 1000,
+  whitelist:[ 'target', 'loginToken', 'targetValid' ]
 };
 
 

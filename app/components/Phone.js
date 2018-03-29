@@ -100,8 +100,8 @@ class PhoneButton extends Component {
 
                 }]
                 break;
-            // We shouldn't ever see anything else, but give a public indication
-            // of breakage if we do.
+                // We shouldn't ever see anything else, but give a public indication
+                // of breakage if we do.
             default:
                 buttons = [{
                     type: "down",
@@ -138,6 +138,14 @@ class PhoneButton extends Component {
  * @alias module:Phone
  */
 class Phone extends Component {
+
+
+    static propTypes = {
+        isLoggedIn: PropTypes.bool.isRequired,
+        pendingDial: PropTypes.string,
+        activeCall: PropTypes.bool.isRequired,
+        inboundAction: PropTypes.string
+    };
 
 
 
@@ -201,7 +209,8 @@ class Phone extends Component {
                         Cstate = 'down';
                     case 'down':
                         InCallManager.stop();
-                        this.setState({ callState: Cstate });
+                        this.setState({ callState: Cstate,
+                         description: '' });
                         break;
                     case 'up':
                         InCallManager.start({ media: 'audio' });
@@ -213,12 +222,20 @@ class Phone extends Component {
                     case 'ring':
                         InCallManager.startRingtone('_DEFAULT_', true, 'playback');
                         inRinging = true;
-                        this.setState({ callState: Cstate });
+                        this.setState({ callState: Cstate,
+                            description: `Call from ${this.myPhone.calls[0].number}`});
+                        // If we have a stacked accept or reject then use it
+                        //    (days/weeks later !!! - is this safe)
+                        if(this.nextInboundAction != null){
+                            device.calls[0][this.nextInboundAction]();
+                            this.nextInboundAction == null;
+                        }
                     case 'dial':
                         // Use native platform ringback tone
                         // TODO early media???
                         InCallManager.start({ media: 'audio', ringback: '_BUNDLE_' });
-                        this.setState({ callState: Cstate });
+                        this.setState({ callState: Cstate,
+                                    description: `Calling ${this.myPhone.calls[0].number}`});
                         inRingback = true;
                         break;
                     default:
@@ -233,15 +250,41 @@ class Phone extends Component {
 
     // Called by react when props are about to change
     componentWillReceiveProps(newProps, newState) {
+        console.log('phone: componentWillReceiveProps(', newProps, newState, ')');
         // If we weren't logged in, but now we are then initialise a phone
         if(newProps.isLoggedIn === true && this.props.isLoggedIn === false)
             initAPI();
+
+        if(newProps.pendingDial != null && newProps.pendingDial != '' &&
+            newProps.pendingDial != this.props.pendingDial) {
+        this.setState({dialNumber: newProps.pendingDial});
+            this.myPhone.dial(newProps.pendingDial)
+                .then((status) => {
+                    InCallManager.start({ media: 'audio' });
+                    this.props.dispatch({type: actions.pendingDial, number:null});
+                    this.setState({ callState: `up` });
+                })
+                .catch((err) => {
+                    console.log('dial fail: ', err);
+                    this.props.dispatch({type: actions.pendingDial, number:null});
+                })
+        }
+
+        if(newProps.inboundAction != null &&
+            newProps.inboundAction != this.props.inboundAction) {
+
+            if(this.myPhone.calls.length == 1 && this.myPhone.calls[0].state == 'ring')
+                this.myPhone.calls[0][newProps.inboundAction]();
+            else
+                this.nextInboundAction = newProps.inboundAction;
+            this.props.dispatch({type: actions.clearAcceptReject});
+        }
     }
 
     render() {
         //TODO: Styling!!!
         return(<View style={styles.container}>
-        <PhoneNumber title="Phone" icon="phone" onChange={(number) => {this.setState({dialNumber: number})}}/>
+        <PhoneNumber onChange={(number) => {this.setState({dialNumber: number})}}/>
         <RTCView streamURL={this.state.videoURL}/>
         <Text>Call State is {this.state.callState}</Text>
                             <PhoneButton
@@ -272,7 +315,11 @@ class Phone extends Component {
 }
 
 const mapStateToProps = state => ({
-    isLoggedIn: state.auth.isLoggedIn
+    isLoggedIn: state.auth.isLoggedIn,
+    pendingDial: state.comms.calls.pendingDial,
+    activeCall: state.comms.calls.activeCall,
+    inboundAction: state.comms.calls.inboundAction
+
 });
 
 const mapDispatchToProps = dispatch => ({
