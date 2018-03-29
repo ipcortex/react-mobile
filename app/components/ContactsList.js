@@ -7,6 +7,7 @@ import {
   View,
   Text
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connect} from 'react-redux';
 
 import {IPCortexAPI} from '../lib/IPCortexAPI';
@@ -16,8 +17,10 @@ import {styles, uiTheme} from '../config/styles.js';
 class ContactsList extends Component {
   constructor(props) {
     super(props);
+    this.phoneIcons = ["phone-hangup", "phone", "phone-in-talk", "phone-incoming"];
     this.IPCortex = new IPCortexAPI();
     this.loadContacts = this.loadContacts.bind(this);
+    this.renderIndividualContact = this.renderIndividualContact.bind(this);
     if (props.isLoggedIn) {
       this.loadContacts();
     }
@@ -26,9 +29,19 @@ class ContactsList extends Component {
     this.props.addContacts(
       this.IPCortex.PBX.contacts.map(contact => ({
         key: contact.cID+'',
-        name: contact.name
+        name: contact.name,
+        state: contact.blf
       }))
     );
+    this.IPCortex.PBX.contacts.forEach(contact => {
+      contact.addListener('update', contact => {
+        this.props.updateContact({
+          key: contact.cID+'',
+          name: contact.name,
+          state: contact.blf
+        });
+      });
+    });
   }
   componentWillReceiveProps(newProps) {
     // If we weren't logged in and now are
@@ -38,7 +51,22 @@ class ContactsList extends Component {
   }
   renderIndividualContact({item}) {
     return (
-      <Text>{item.name}</Text>
+      <View style={{flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'}}>
+        <Text>{item.name}</Text>
+        <Icon
+          name={this.phoneIcons[item.state]}
+          style={{
+            backgroundColor: "#00aa00",
+            color: 'white',
+            borderRadius: 3,
+            padding: 3,
+            marginHorizontal: 10,
+            marginVertical: 2
+          }}
+        />
+      </View>
     );
   }
   render() {
@@ -58,7 +86,8 @@ const mapStateToProps = state => ({
   contacts: state.contacts
 });
 const mapDispatchToProps = dispatch => ({
-  addContacts: (contacts) => dispatch({type: actions.AddContacts.type, contacts})
+  addContacts: (contacts) => dispatch({type: actions.AddContacts, contacts}),
+  updateContact: (contact) => dispatch({type: actions.UpdateContact, contact})
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ContactsList);
