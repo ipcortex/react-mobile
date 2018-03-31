@@ -10,6 +10,7 @@ import { registerScreens, switchContext } from './screens';
 
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
+import InCallManager from 'react-native-incall-manager';
 
 
 import pushNotification from './lib/pushNotification';
@@ -39,8 +40,17 @@ var notification = new pushNotification(store.dispatch,
 //  the app is (re)started which means we don't process background
 //  notifications
 notification.register({
-    Accept: function() { store.dispatch({type: actions.AcceptCall}) },
-    Reject: function() { store.dispatch({type: actions.RejectCall}) },
+    Ring: function() {
+        InCallManager.startRingtone('_BUNDLE_');
+    }
+},
+{
+    Accept: function() {
+        InCallManager.stopRingtone('_BUNDLE_');
+        store.dispatch({type: actions.AcceptCall}) },
+    Reject: function() {
+        InCallManager.stopRingtone('_BUNDLE_');
+        store.dispatch({type: actions.RejectCall}) }
 });
 /**
  * IPCMobile root React Native Component
