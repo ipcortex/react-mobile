@@ -17,7 +17,6 @@ import {styles, uiTheme} from '../config/styles.js';
 class RecentsList extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {calls: []};
 		this.IPCortex = new IPCortexAPI();
 		if (props.isLoggedIn) {
 			this.registerHistory();
@@ -31,7 +30,7 @@ class RecentsList extends Component {
 	registerHistory() {
 		// Register the handler for history updates
 		this.IPCortex.PBX.enableHistory(history => {
-			this.setState({calls: this.state.calls.concat(history)});
+			this.props.addCall(history);
 		});
 		// enable history on the first device (might want to do a different device)
 		this.IPCortex.PBX.owned[0].history(true);
@@ -39,15 +38,19 @@ class RecentsList extends Component {
 	render() {
 		return (
 			<View style={styles.container}>
-				{this.state.calls.map(call => <RecentCall key={call.callID} call={call} />)}
+				{this.props.recentCalls.map(call => <RecentCall key={call.callID} call={call} />)}
 			</View>
 		);
 	}
 };
 
 const mapStateToProps = state => ({
-	isLoggedIn: state.auth.isLoggedIn
+	isLoggedIn: state.auth.isLoggedIn,
+	recentCalls: state.recents
+});
+const mapDispatchToProps = dispatch => ({
+	addCall: (call) => dispatch({type: actions.AddRecentCall, call})
 });
 
-export default connect(mapStateToProps)(RecentsList);
+export default connect(mapStateToProps, mapDispatchToProps)(RecentsList);
 
