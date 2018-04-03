@@ -14,9 +14,14 @@ export default function RecentCall({call}) {
 		<View style={{
 			flexDirection: 'row',
 			justifyContent: 'space-between',
-			alignItems: 'center'
+			alignItems: 'center',
+			paddingHorizontal: 25,
+			paddingVertical: 3
 		}}>
-			<Text>{call.name+' - '+call.number}</Text>
+			<View>
+				<Text style={{fontSize: 20}}>{call.name}</Text>
+				<Text style={{color: '#bbb'}}>{call.number}</Text>
+			</View>
 			<Text>{formatDate(call.stamp)}</Text>
 		</View>
 	);
