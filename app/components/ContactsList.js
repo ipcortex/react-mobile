@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-// Will probably want SectionList eventually
+
 import {
   Platform,
   StyleSheet,
