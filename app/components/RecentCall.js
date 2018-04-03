@@ -19,8 +19,8 @@ export default function RecentCall({call}) {
 			paddingVertical: 3
 		}}>
 			<View>
-				<Text style={{fontSize: 20}}>{call.name}</Text>
-				<Text style={{color: '#bbb'}}>{call.number}</Text>
+				<Text style={{fontSize: 20}}>{call.remoteName}</Text>
+				<Text style={{color: '#bbb'}}>{call.remoteNumber}</Text>
 			</View>
 			<Text>{formatDate(call.stamp)}</Text>
 		</View>
