@@ -89,7 +89,13 @@ export default class IPCMobile extends Component {
     }
 
     startApp(root) {
-
+        // This is a workaround for the fact that JsSIP sets a re-registration timer
+        // for multiple minutes and this is an anti-pattern in Android apps.
+        // We don't care about this because we are content to let the registration die,
+        // but the console nag is a pain.
+        console.ignoredYellowBox = [
+                'Setting a timer'
+        ];
         switchContext(root);
 
     }
