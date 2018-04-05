@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import {
   Platform,
   StyleSheet,
+  TouchableHighlight,
   View,
   Text
 } from 'react-native';
@@ -17,8 +18,9 @@ const phoneIcons = {
 	'noanswer': 'call-made'
 };
 
-export default function RecentCall({call}) {
+export default function RecentCall({call, dial}) {
 	return (
+        <TouchableHighlight onPress={dial}>
 		<View style={{
 			flexDirection: 'row',
 			justifyContent: 'space-between',
@@ -27,7 +29,7 @@ export default function RecentCall({call}) {
 			paddingVertical: 3
 		}}>
 		<View style={{flexDirection: 'row'}}>
-				<Icon 
+				<Icon
 					name={phoneIcons[call.party]}
 					style={{
 						color: '#ddd'
@@ -41,10 +43,10 @@ export default function RecentCall({call}) {
 			</View>
 			<Text>{formatDate(call.stamp)}</Text>
 		</View>
+        </TouchableHighlight>
 	);
 }
 
 function formatDate(date) {
 	return moment(date).fromNow(true);
 }
-

@@ -17,7 +17,7 @@ export default class PhoneNumber extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            number: ''
+            number: props.number?props.number:''
         };
     }
 

@@ -41,15 +41,15 @@ var notification = new pushNotification(store.dispatch,
 //  notifications
 notification.register({
     Ring: function() {
-        InCallManager.startRingtone('_BUNDLE_');
+        InCallManager.startRingtone('_BUNDLE_',null,null,15);
     }
 },
 {
     Accept: function() {
-        InCallManager.stopRingtone('_BUNDLE_');
+        InCallManager.stopRingtone();
         store.dispatch({type: actions.AcceptCall}) },
     Reject: function() {
-        InCallManager.stopRingtone('_BUNDLE_');
+        InCallManager.stopRingtone();
         store.dispatch({type: actions.RejectCall}) }
 });
 /**

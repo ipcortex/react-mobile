@@ -37,14 +37,14 @@ class RecentsList extends Component {
 		this.IPCortex.PBX.owned[0].history(true);
 	}
 	renderIndividualCall({item}) {
-		return <RecentCall call={item} />;
+		return <RecentCall call={item} dial={this.props.dial(item.remoteNumber)} />;
 	}
 	render() {
 		return (
 			<View style={styles.container}>
 				<FlatList
 					data={this.props.recentCalls}
-					renderItem={this.renderIndividualCall}
+					renderItem={this.renderIndividualCall.bind(this)}
 				/>
 			</View>
 		);
@@ -56,8 +56,8 @@ const mapStateToProps = state => ({
 	recentCalls: state.recents
 });
 const mapDispatchToProps = dispatch => ({
-	addCall: (call) => dispatch({type: actions.AddRecentCall, call})
+	addCall: (call) => dispatch({type: actions.AddRecentCall, call}),
+    dial: (number) => () => dispatch({type: actions.Dial, number})
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(RecentsList);
-

@@ -16,7 +16,7 @@ class PhoneScreen extends React.Component {
   render() {
     return ( <ThemeProvider uiTheme={uiTheme}>
         <View style={styles.container}>
-        <Phone />
+        <Phone navigator={this.props.navigator}/>
     </View>
 </ThemeProvider> );
   }
