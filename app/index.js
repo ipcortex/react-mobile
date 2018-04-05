@@ -10,6 +10,7 @@ import { registerScreens, switchContext } from './screens';
 
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
+import InCallManager from 'react-native-incall-manager';
 
 
 import pushNotification from './lib/pushNotification';
@@ -39,8 +40,17 @@ var notification = new pushNotification(store.dispatch,
 //  the app is (re)started which means we don't process background
 //  notifications
 notification.register({
-    Accept: function() { store.dispatch({type: actions.AcceptCall}) },
-    Reject: function() { store.dispatch({type: actions.RejectCall}) },
+    Ring: function() {
+        InCallManager.startRingtone('_BUNDLE_',null,null,15);
+    }
+},
+{
+    Accept: function() {
+        InCallManager.stopRingtone();
+        store.dispatch({type: actions.AcceptCall}) },
+    Reject: function() {
+        InCallManager.stopRingtone();
+        store.dispatch({type: actions.RejectCall}) }
 });
 /**
  * IPCMobile root React Native Component
@@ -79,7 +89,13 @@ export default class IPCMobile extends Component {
     }
 
     startApp(root) {
-
+        // This is a workaround for the fact that JsSIP sets a re-registration timer
+        // for multiple minutes and this is an anti-pattern in Android apps.
+        // We don't care about this because we are content to let the registration die,
+        // but the console nag is a pain.
+        console.ignoredYellowBox = [
+                'Setting a timer'
+        ];
         switchContext(root);
 
     }
