@@ -3,14 +3,15 @@ import { Navigation } from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {
-    Button,
+	Button,
+	Dimensions,
 	Platform,
 	StyleSheet,
-    TouchableHighlight,
+	TouchableHighlight,
 	SectionList,
 	View,
 	Text,
-    TextInput,
+	TextInput,
 	RefreshControl
 } from 'react-native';
 import { connect } from 'react-redux';
@@ -25,18 +26,24 @@ import { styles, uiTheme } from '../config/styles.js';
 class SearchBar extends Component {
 	constructor(props) {
 		super(props);
-        this.state = {};
+		this.state = {};
 
 	}
 
 	render() {
-			return (<View style={styles.header_container}>
+		const width = Dimensions.get(`window`)
+			.width;
+		console.log('Searchbar', this.props, { width });
+		return (<View style={[{ width }, styles.header_container]}>
                 <Icon name="search" style={styles.header_button} size={30}/>
                 <TextInput
-                    style={styles.header_text}
+                    style={[styles.header_text, {width: width-112}]}
                     textAlign={'center'}
                     placeholder={'Search name'}
-                    onChangeText = {(text) => this.setState({search: text})}/>
+                    onChangeText = {(text) => {
+                        this.setState({search: text})
+                        dispatch({ type: actions.constrainContacts, name: text })
+                    }}/>
                 <TouchableHighlight onPress={() => {console.log('cancel press')}}>
                     <Icon name="cancel" style={styles.header_button} size={30}/>
                     </TouchableHighlight>
@@ -44,7 +51,7 @@ class SearchBar extends Component {
 	}
 };
 
-Navigation.registerComponent('IPCMobile.ContactSearchHeader', () => SearchBar, (text) => dispatch({ type: actions.constrainContacts, name: text}));
+Navigation.registerComponent('IPCMobile.ContactSearchHeader', () => SearchBar);
 
 class ContactsList extends Component {
 	constructor(props) {
@@ -128,16 +135,13 @@ class ContactsList extends Component {
 	}
 	render() {
 		return (
-			<View style={styles.container}>
-                <SearchBar/>
-        <SectionList
+			<SectionList
           sections={this.alphabetise(this.props.contacts)}
           renderItem={this.renderIndividualContact}
           renderSectionHeader={this.renderSectionHeader}
           onRefresh={this.onRefresh}
           refreshing={this.state.refreshing}
         />
-      </View>
 		);
 	}
 };

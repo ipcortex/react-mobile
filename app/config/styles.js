@@ -94,25 +94,18 @@ const styles = StyleSheet.create({
 	domainInputError: { backgroundColor: "#ededed", borderWidth: 4, borderColor: "red" },
 
 
-
-	header_container: {
-		justifyContent: 'center',
-		alignItems: 'center',
-		width: DEVICE_WIDTH,
-		height: 56,
-		marginBottom: 6,
-		flexDirection: 'row'
-	},
-	header_button: {
+    header_container: {
+        zIndex: 2,
+        flex: 1,
+        alignItems: 'stretch',
         justifyContent: 'center',
-        alignItems: 'center',
-        width: 56,
-        height: 40,
+        flexDirection: 'row'
+    },
+    header_button: {
+        justifyContent: 'center',
     },
     header_text: {
-        justifyContent: 'center',
-        width: DEVICE_WIDTH - 112,
-        height: 40,
+        justifyContent: 'flex-start',
         alignItems: 'center',
     }
 
