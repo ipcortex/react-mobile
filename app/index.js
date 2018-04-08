@@ -94,7 +94,7 @@ export default class IPCMobile extends Component {
         // We don't care about this because we are content to let the registration die,
         // but the console nag is a pain.
         console.ignoredYellowBox = [
-                'Setting a timer'
+                'Setting a timer', 'Remote debugger'
         ];
         switchContext(root);
 
