@@ -22,7 +22,11 @@ import { IPCortexAPI } from '../lib/IPCortexAPI';
 import { actions } from '../reducers';
 import { styles, uiTheme } from '../config/styles.js';
 
-
+/**
+ * Simple SearchBar for us in mobile app header
+ *
+ * @extends Component
+ */
 class SearchBar extends Component {
 	constructor(props) {
 		super(props);
@@ -41,8 +45,7 @@ class SearchBar extends Component {
                     textAlign={'center'}
                     placeholder={'Search name'}
                     onChangeText = {(text) => {
-                        this.setState({search: text})
-                        dispatch({ type: actions.constrainContacts, name: text })
+                        this.props.FilterContacts(text);
                     }}/>
                 <TouchableHighlight onPress={() => {console.log('cancel press')}}>
                     <Icon name="cancel" style={styles.header_button} size={30}/>
@@ -51,7 +54,17 @@ class SearchBar extends Component {
 	}
 };
 
-Navigation.registerComponent('IPCMobile.ContactSearchHeader', () => SearchBar);
+const mapSbStateToProps = state => ({
+	contacts: state.contacts
+});
+const mapSbDispatchToProps = dispatch => ({
+	FilterContacts: (name) => dispatch({ type: actions.FilterContacts, name }),
+});
+
+const ContactSearchHeader = connect(mapSbStateToProps, mapSbDispatchToProps)(SearchBar);
+
+export { ContactSearchHeader };
+
 
 class ContactsList extends Component {
 	constructor(props) {
@@ -134,9 +147,10 @@ class ContactsList extends Component {
 		);
 	}
 	render() {
+        console.log('called to re-render');
 		return (
 			<SectionList
-          sections={this.alphabetise(this.props.contacts)}
+          sections={this.alphabetise(this.props.contacts.filter((contact) => contact.hide?null:contact))}
           renderItem={this.renderIndividualContact}
           renderSectionHeader={this.renderSectionHeader}
           onRefresh={this.onRefresh}
