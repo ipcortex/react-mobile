@@ -2,7 +2,7 @@ const initialContactsState = [];
 
 export const actions = {
 	AddContacts: 'ADD_CONTACTS',
-    FilterContacts: 'FILTER_CONTACTS',
+	FilterContacts: 'FILTER_CONTACTS',
 	UpdateContact: 'UPDATE_CONTACT',
 	DeleteContact: 'DELETE_CONTACT'
 };
@@ -18,7 +18,7 @@ export default function contactsReducer(state = initialContactsState, action) {
 		newState = state.map(contact => {
 			if (contact.key == action.contact.key) {
 				updated = true;
-				return action.contact;
+				return Object.assign({}, contact, action.contact);
 			} else {
 				return contact;
 			}
@@ -35,10 +35,20 @@ export default function contactsReducer(state = initialContactsState, action) {
 			newState.splice(deleteIndex, 1);
 		break;
 	case actions.FilterContacts:
-        const pattern = new RegExp(action.name, 'ig');
-        newState = state;
-		newState.forEach((contact) => {
-			contact.hide = (action.name && action.name.length && !contact.name.match(pattern));
+		let pattern;
+		if (action.name)
+			pattern = new RegExp(action.name, 'ig');
+		newState = state.map((contact) => {
+			var hide = action.name &&
+				action.name.length > 0 &&
+				(contact.name + contact.number + contact.company)
+				.match(pattern) == null;
+			if (contact.hide !== hide)
+				// Must replace, not just mutate current. Crying at the inefficiency of this.
+				return Object.assign({}, contact, { hide: hide });
+			else {
+				return contact;
+			}
 		})
 		break;
 	default:
