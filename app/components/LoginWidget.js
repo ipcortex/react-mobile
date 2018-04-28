@@ -103,20 +103,6 @@ class LoginWidget extends Component {
         // but think we have
         if(!this.props.target || this.props.target === '')
             this.props.dispatch(actions.invalidateTarget);
-        else if(this.props.target &&
-            this.props.target != '') {
-            this.props.dispatch(actions.invalidateTarget);
-            this.IPCortex.loadAPI(this.props.target)
-                .then((hostname) => {
-                    this.props.dispatch(actions.validateTarget);
-                })
-                .catch((err) => {
-                    this.setState({ apiError: err.toString() });
-                });
-        }
-
-
-
     }
     // Called by react when props are about to change
     componentWillReceiveProps(newProps, newState) {
@@ -130,8 +116,6 @@ class LoginWidget extends Component {
                 .catch((err) => {
                     this.props.dispatch(actions.setLoginToken.token(null));
                 });
-        else (newProps.notificationToken != null && newProps.notificationToken != this.props.notificationToken)
-            this.IPCortex.sendNotificationToken(newProps.notificationToken);
     }
     /**
      * Render inline tags to output confirmation of current login server (if API is valid),

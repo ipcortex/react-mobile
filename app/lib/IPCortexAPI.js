@@ -24,7 +24,8 @@ import IPCortexConfig from '../config/ipcortex';
 //        the global namespace
 // false = load from the PBX and hide them in this module
 const localAPIBuild = true;
-// Remove next two lines if localAPIBuild === false
+// Remove next three lines if localAPIBuild === false
+global.chrome = {storage: AsyncStorage}
 import expJsSIP from 'jssip';
 import expIPCortex from 'ipcortex-api';
 
@@ -135,7 +136,7 @@ class IPCortexAPI {
     /**
      * Load the API from a specific PBX
      *
-     * @method setServer
+     * @method loadAPI
      * @param  {string}  hostname PBX hostname
      * @return {Promise}
      */
@@ -235,9 +236,10 @@ class IPCortexAPI {
         if(response.status == 200) {
             let body = await response.text();
             this.haveSetServer = true;
-            if (this.tokenToSend){
-                await this.sendNotificationToken(this.tokenToSend);
-                delete this.tokenToSend;
+            if (state.tokenToSend){
+                console.log(`NOW sending paused token ${state.tokenToSend}`);
+                await this.sendNotificationToken(state.tokenToSend);
+                delete state.tokenToSend;
             }
             this.PBX.Auth.setHost(IPCortexConfig.proxy);
         } else {
@@ -264,11 +266,12 @@ class IPCortexAPI {
                 let body = await response.text();
             } else {
                 // try again later perhaps
-                this.tokenToSend = token;
+                state.tokenToSend = token;
                 throw `could not set token at proxy ${IPCortexConfig.proxy}`;
             }
         } else {
-            this.tokenToSend = token;
+            console.log(`NOT sending token ${token} yet`);
+            state.tokenToSend = token;
         }
     }
 

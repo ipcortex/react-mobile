@@ -156,7 +156,7 @@ class Phone extends Component {
 		if (props.isLoggedIn) {
 			this.initAPI();
 		}
-        this.actions = actions;
+		this.actions = actions;
 
 		if (props.testing) {
 			// Test rig that just does some sensible asnyc state transitions
@@ -176,11 +176,15 @@ class Phone extends Component {
 	initAPI() {
 		// Called when we know we are logged in so should have an IPCortex API
 		// with an owned softphone at this point.
+		var listening;
 		if (this.IPCortex.PBX && this.IPCortex.PBX.owned && this.IPCortex.PBX.owned[0]) {
+			if (listening)
+				return;
 			// TODO: More error checking (plus just how many places do we stash
 			// IPCortex and JsSIP objects??)
 			JsSIP = this.IPCortex.JsSIP;
 			IPCortex = this.IPCortex;
+			console.log('initAPI IPCortex.PBX.owned = ', this.IPCortex.PBX.owned);
 			this.myPhone = this.IPCortex.PBX.owned[0];
 			var { inRinging, inRingback, haveCall } = false;
 			/* Assume the phone is a keevio phone and enable it for WebRTC */
@@ -188,13 +192,15 @@ class Phone extends Component {
 				.catch(err => {
 					console.log(err)
 				})
-			/* Listener which wait for new call events to arrive */
+			console.log('P2 initAPI IPCortex.PBX.owned = ', this.IPCortex.PBX.owned);
+			/* Listener which waits for new call events to arrive */
 			this.myPhone.addListener('update', (device) => {
 				/* If there are multiple calls, ignore all except the first */
 				console.log('Got cb with ', device, device.calls);
 				let Cstate = 'down';
 				if (device.calls.length > 0)
 					Cstate = device.calls[0].state;
+				device.calls.forEach((call, index) => index > 1 && call.hangup());
 				console.log(Cstate);
 
 				if (inRingback && Cstate != 'dial') {
@@ -250,8 +256,9 @@ class Phone extends Component {
 						break;
 				}
 			});
+			listening = true;
 		} else {
-			//throw 'IPCortex API not loaded when trying to start Phone';
+			throw 'IPCortex API not loaded when trying to start Phone';
 		}
 	}
 
@@ -264,7 +271,7 @@ class Phone extends Component {
 
 		if (newProps.pendingDial != null && newProps.pendingDial != '' &&
 			newProps.pendingDial != this.props.pendingDial) {
-                this.props.navigator.switchToTab();
+			this.props.navigator.switchToTab();
 			this.setState({ dialNumber: newProps.pendingDial, state: 'dial' });
 			InCallManager.start({ media: 'audio', ringback: '_BUNDLE_' });
 			this.myPhone.dial(newProps.pendingDial)
