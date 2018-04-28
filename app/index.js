@@ -14,6 +14,7 @@ import InCallManager from 'react-native-incall-manager';
 
 
 import pushNotification from './lib/pushNotification';
+import { IPCortexAPI } from './lib/IPCortexAPI';
 
 import AppReducer, { actions } from './reducers';
 
@@ -61,6 +62,7 @@ notification.register({
 export default class IPCMobile extends Component {
     constructor(props) {
         super(props);
+        var api = new IPCortexAPI(true, store, Provider);
         registerScreens(store, Provider)
             .then(() => {
                 if(Platform.OS === 'ios') {

@@ -123,7 +123,7 @@ class LoginWidget extends Component {
         // If the API just initialised and we have a previous login token then give it a try
         if(newProps.targetValid === true && this.props.targetValid === false)
             if(typeof newProps.loginToken === 'object')
-                this.do_login({ token: this.props.loginToken })
+                this.IPCortex.doLogin({ token: this.props.loginToken }, this.props.target)
                 // Nothing to do if we succeded, do_login takes care of firing state changes
                 .then((status) => console.log(status))
                 // failed? no point hanging on to a duff token but do_login cant do this for us
@@ -167,35 +167,7 @@ class LoginWidget extends Component {
       </View>)
         }
     }
-    /**
-     * User login to an instance of the API. Async, returns immediately with Promise and caller
-     * need not care too much as ultimately dispatches a 'Login' or 'loginError' state change
-     * action on the UI.
-     *
-     * @method do_login
-     * @param  {Object} credentials eiher {username: 'username', password: 'password' }, or {token:}
-     *
-     */
-    async do_login(credentials) {
-        try {
-            await this.IPCortex.setServer(this.props.target, credentials.username)
 
-            await this.IPCortex.PBX.Auth.login(Object.assign({
-                notoken: false,
-                nodom: true,
-                tokenCB: (token) => this.props.dispatch(actions.setLoginToken.token(token))
-            }, credentials));
-            await this.IPCortex.PBX.startFeed({
-                device: true
-            });
-            this.props.dispatch(actions.Login);
-            return "OK";
-
-        } catch(err) {
-            this.props.dispatch(actions.loginError.message(err.toString()));
-            throw "login fail";
-        }
-    }
 
     input_login() {
         if(this.props.targetValid)
@@ -222,14 +194,14 @@ class LoginWidget extends Component {
                     value={this.state.password}
                     secureTextEntry={true}
                     placeholder={'Password'}
-                    onSubmitEditing={() => this.do_login({username: this.state.username, password: this.state.password})}
+                    onSubmitEditing={() => this.IPCortex.doLogin({username: this.state.username, password: this.state.password}, this.props.target)}
                   />
               </View>
           <View style={{flex:0.1}}/>
           </View>
           <View style={{flex: 4}}>
               <Button style={{flex: 4}}
-                  onPress={() => this.do_login({username: this.state.username, password: this.state.password})}
+                  onPress={() => this.IPCortex.doLogin({username: this.state.username, password: this.state.password}, this.props.target)}
                   title="Login"/>
               </View>
             <Text>{this.props.loginError}</Text>

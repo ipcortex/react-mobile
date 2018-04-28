@@ -30,7 +30,7 @@ import { styles, uiTheme } from '../config/styles.js';
 class SearchBar extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {};
+		this.state = { text: '' };
 
 	}
 
@@ -41,13 +41,21 @@ class SearchBar extends Component {
 		return (<View style={[{ width }, styles.header_container]}>
                 <Icon name="search" style={styles.header_button} size={30}/>
                 <TextInput
+                    ref={(ref) => {this.textInput = ref}}
+                    value={this.state.value}
                     style={[styles.header_text, {width: width-112}]}
                     textAlign={'center'}
+                    inlineImageLeft='search_icon'
                     placeholder={'Search name'}
                     onChangeText = {(text) => {
                         this.props.FilterContacts(text);
                     }}/>
-                <TouchableHighlight onPress={() => {console.log('cancel press')}}>
+                <TouchableHighlight onPress={() => {
+                        console.log('cancel press');
+                        if(this.textInput)
+                        this.textInput.clear();
+                        this.props.FilterContacts('');
+                    }}>
                     <Icon name="cancel" style={styles.header_button} size={30}/>
                     </TouchableHighlight>
                 </View>);

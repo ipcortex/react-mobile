@@ -10,6 +10,8 @@ var {
     getUserMedia,
 } = WebRTC;
 
+import { actions } from '../reducers';
+
 import IPCortexConfig from '../config/ipcortex';
 
 // This module was initially conceived to pull the API from the target
@@ -64,16 +66,49 @@ class IPCortexAPI {
      * behaviour is usually what is needed unless instaces are used against different
      * PBXs or different users
      */
-    constructor(singleInstance = true) {
+    constructor(singleInstance = true, store, Provider) {
         // By default we use one instance of the API for all
         //  instantiations of this class, as this is what we mostly want.
         if(singleInstance)
             Object.assign(this, state);
-
+        if(store != null && Provider != null){
+            Object.assign(state, {store, Provider});
+            Object.assign(this, {store, Provider});
+        }
     }
 
     startFeed() {
 
+    }
+
+    /**
+     * User login to an instance of the API. Async, returns immediately with Promise and caller
+     * need not care too much as ultimately dispatches a 'Login' or 'loginError' state change
+     * action on the UI.
+     *
+     * @method doLogin
+     * @param  {Object} credentials eiher {username: 'username', password: 'password' }, or {token:}
+     *
+     */
+    async doLogin(credentials, target) {
+        try {
+            await this.setServer(target, credentials.username)
+
+            await this.IPCortex.PBX.Auth.login(Object.assign({
+                notoken: false,
+                nodom: true,
+                tokenCB: (token) => this.store.dispatch(actions.setLoginToken.token(token))
+            }, credentials));
+            await this.IPCortex.PBX.startFeed({
+                device: true
+            });
+            this.store.dispatch(actions.Login);
+            return "OK";
+
+        } catch(err) {
+            this.store.dispatch(actions.loginError.message(err.toString()));
+            throw "login fail";
+        }
     }
 
     patch(module, text) {
