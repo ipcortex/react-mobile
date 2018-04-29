@@ -45,6 +45,7 @@ notification.register({
 }, {
 	Accept: function () {
 		InCallManager.stopRingtone();
+        store.dispatch(actions.Phone);
 		store.dispatch({ type: actions.AcceptCall })
 	},
 	Reject: function () {
@@ -77,10 +78,11 @@ export default class IPCMobile extends Component {
 	onStoreUpdate() {
 
 		let state = store.getState();
-		let { root } = state.nav
+		let { root, refresh } = state.nav
 		// handle a root change
-		if (this.currentRoot != root) {
+		if (this.currentRoot != root || this.refresh != refresh) {
 			this.currentRoot = root;
+            this.refresh = refresh;
 			this.startApp(root);
 		}
 		let { target, loginToken, notificationToken } = state.auth;

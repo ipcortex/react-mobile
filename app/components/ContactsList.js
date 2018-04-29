@@ -39,14 +39,13 @@ class SearchBar extends Component {
 			.width;
 		console.log('Searchbar', this.props, { width });
 		return (<View style={[{ width }, styles.header_container]}>
-                <Icon name="search" style={styles.header_button} size={30}/>
                 <TextInput
                     ref={(ref) => {this.textInput = ref}}
                     value={this.state.value}
-                    style={[styles.header_text, {width: width-112}]}
+                    style={[styles.header_text, {width: width-76}]}
                     textAlign={'center'}
                     inlineImageLeft='search_icon'
-                    placeholder={'Search name'}
+                    placeholder={'Search'}
                     onChangeText = {(text) => {
                         this.props.FilterContacts(text);
                     }}/>
@@ -147,7 +146,7 @@ class ContactsList extends Component {
 		}
 	}
 	renderSectionHeader({ section }) {
-		return (<Text>{section.title}</Text>);
+		return (<Text style={styles.contact_sectionhead}>{section.title}</Text>);
 	}
 	renderIndividualContact({ item }) {
 		return (

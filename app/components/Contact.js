@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import { styles, uiTheme } from '../config/styles.js';
+
 const phoneIcons = ["phone-hangup", "phone", "phone-in-talk", "phone-incoming"];
 const iconColors = {
   "online": "#00bb00",
@@ -26,20 +28,16 @@ export default function Contact({contact, dial}) {
         paddingHorizontal: 25,
         paddingVertical: 3
       }}>
-        <Text style={{
-          fontSize: 20
-        }}>{contact.name}</Text>
+        <Text style={styles.contact_text}>{contact.name}</Text>
         <Icon
           name={phoneIcons[contact.blf]}
           style={{
-            backgroundColor: iconColors[contact.state] || "#d1312b",
-            color: 'white',
+            color: iconColors[contact.state] || "#d1312b",
             padding: 6
           }}
-          size={44}
+          size={32}
         />
       </View>
     </TouchableHighlight>
   );
 };
-

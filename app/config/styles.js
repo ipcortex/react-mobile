@@ -93,6 +93,14 @@ const styles = StyleSheet.create({
 	domainInputWarning: { backgroundColor: "#ededed", borderWidth: 4, borderColor: "yellow" },
 	domainInputError: { backgroundColor: "#ededed", borderWidth: 4, borderColor: "red" },
 
+    contact_text: {
+      fontSize: 16
+    },
+
+    contact_sectionhead: {
+      fontSize: 18,
+      fontWeight: 'bold'
+    },
 
     header_container: {
         zIndex: 2,
@@ -102,7 +110,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     header_button: {
-        justifyContent: 'center',
+        alignContent: 'center',
+        textAlignVertical: 'center'
     },
     header_text: {
         justifyContent: 'flex-start',
