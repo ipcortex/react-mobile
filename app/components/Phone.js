@@ -288,7 +288,7 @@ class Phone extends Component {
 
 		if (newProps.inboundAction != null &&
 			newProps.inboundAction != this.props.inboundAction) {
-
+			this.props.navigator.switchToTab();
 			if (this.myPhone.calls.length == 1 && this.myPhone.calls[0].state == 'ring')
 				this.myPhone.calls[0][newProps.inboundAction]();
 			else

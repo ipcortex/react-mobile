@@ -1,4 +1,4 @@
-const initialNavState = { root: 'login', refresh: 0 }
+const initialNavState = { root: 'nothing', refresh: 0 }
 
 import { actions as authActions } from './auth';
 

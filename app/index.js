@@ -4,7 +4,7 @@ import { createStore, applyMiddleware, combineReducers } from "redux";
 
 import { Provider } from "react-redux";
 
-import { Navigation } from 'react-native-navigation';
+import { Navigation, NativeEventsReceiver } from 'react-native-navigation';
 
 import { registerScreens, switchContext } from './screens';
 
@@ -45,7 +45,7 @@ notification.register({
 }, {
 	Accept: function () {
 		InCallManager.stopRingtone();
-        store.dispatch(actions.Phone);
+		store.dispatch(actions.Phone);
 		store.dispatch({ type: actions.AcceptCall })
 	},
 	Reject: function () {
@@ -80,10 +80,18 @@ export default class IPCMobile extends Component {
 		let state = store.getState();
 		let { root, refresh } = state.nav
 		// handle a root change
-		if (this.currentRoot != root || this.refresh != refresh) {
+		if (this.currentRoot != root && root !== 'nothing') {
 			this.currentRoot = root;
-            this.refresh = refresh;
-			this.startApp(root);
+			this.refresh = refresh;
+			Navigation.isAppLaunched()
+				.then((appLaunched) => {
+					if (appLaunched) {
+						this.startApp(root);
+					}
+					new NativeEventsReceiver()
+						.appLaunched(() => this.startApp(root));
+				})
+			//this.startApp(root);
 		}
 		let { target, loginToken, notificationToken } = state.auth;
 		if (target &&
@@ -95,10 +103,14 @@ export default class IPCMobile extends Component {
 					store.dispatch(actions.validateTarget);
 					if (typeof loginToken === 'object')
 						this.api.doLogin({ token: loginToken }, target)
-						// Nothing to do if we succeded, do_login takes care of firing state changes
-						.then((status) => console.log(status))
+						// If we succeded, fire state transition
+						.then((status) => {
+							store.dispatch(actions.Login);
+							console.log(status);
+						})
 						// failed? no point hanging on to a duff token but do_login cant do this for us
 						.catch((err) => {
+							console.log('this.api.dologin: err: ', err);
 							store.dispatch(actions.setLoginToken.token(null));
 							store.dispatch(actions.Logout);
 						});
@@ -121,6 +133,7 @@ export default class IPCMobile extends Component {
 		console.ignoredYellowBox = [
 			'Setting a timer', 'Remote debugger'
 		];
+
 		switchContext(root);
 
 	}

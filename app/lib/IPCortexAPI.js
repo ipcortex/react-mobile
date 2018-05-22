@@ -103,7 +103,6 @@ class IPCortexAPI {
             await this.IPCortex.PBX.startFeed({
                 device: true
             });
-            this.store.dispatch(actions.Login);
             return "OK";
 
         } catch(err) {

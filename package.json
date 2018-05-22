@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "prepare": "patch-package",
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
     "run-web": "./node_modules/.bin/webpack-dev-server -d --config ./web/webpack.config.js --inline --hot --colors",
@@ -30,7 +29,6 @@
     "react-native-sensitive-info": "^5.1.0",
     "react-native-vector-icons": "^4.5.0",
     "react-native-webrtc": "^1.58.2",
-    "react-navigation-redux-helpers": "^1.0.1",
     "react-redux": "^5.0.7",
     "redux": "^3.7.2",
     "redux-persist": "^5.9.1",
