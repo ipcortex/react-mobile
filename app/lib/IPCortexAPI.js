@@ -205,18 +205,19 @@ class IPCortexAPI {
             //Object.assign(state.Auth, state.PBX.Auth);
             // Also stash the created API plus the WebRTC object it references in this instance
             Object.assign(this, state);
-
-
             if(this.isLoaded) {
                 // Got a PBX obj, resolve to the hostname
-                console.info(`API loaded from ${hostname}`)
+                console.log(`API loaded from ${hostname}`);
+                this.store.dispatch(actions.validateTarget);
                 return hostname;
             } else {
+                this.store.dispatch(actions.inValidateTarget);
                 throw `loaded PBX but typeof PBX is ${typeof PBX}`;
             }
 
         } catch(error) {
-
+          console.info(`API error ${errro.toString()}`);
+            this.store.dispatch(actions.inValidateTarget);
             throw `${error.toString()} reading from ${hostname}`
         }
     }
