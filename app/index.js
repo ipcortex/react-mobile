@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, Platform } from 'react-native';
+import { AppRegistry, Platform, YellowBox } from 'react-native';
 import { createStore, applyMiddleware, combineReducers } from "redux";
 
 import { Provider } from "react-redux";
@@ -63,6 +63,7 @@ export default class IPCMobile extends Component {
 	constructor(props) {
 		super(props);
 		this.api = new IPCortexAPI(true, store, Provider);
+    console.info('created', this);
 		registerScreens(store, Provider)
 			.then(() => {
 				// Dont fire our first event until we are sure the redux
@@ -80,11 +81,13 @@ export default class IPCMobile extends Component {
 		let state = store.getState();
 		let { root, refresh } = state.nav
 		// handle a root change
+		console.log('onStoreUpdate', state, this);
 		if (this.currentRoot != root && root !== 'nothing') {
 			this.currentRoot = root;
 			this.refresh = refresh;
 			Navigation.isAppLaunched()
 				.then((appLaunched) => {
+          console.log('isAppLauncehd', appLaunched);
 					if (appLaunched) {
 						this.startApp(root);
 					}
@@ -100,8 +103,9 @@ export default class IPCMobile extends Component {
 			this.api.loadAPI(target)
 				.then((hostname) => {
 					this.currentTarget = target;
+          console.log('apiLoaded', this);
 					store.dispatch(actions.validateTarget);
-					if (typeof loginToken === 'object')
+					if (typeof loginToken === 'object'){
 						this.api.doLogin({ token: loginToken }, target)
 						// If we succeded, fire state transition
 						.then((status) => {
@@ -114,12 +118,23 @@ export default class IPCMobile extends Component {
 							store.dispatch(actions.setLoginToken.token(null));
 							store.dispatch(actions.Logout);
 						});
+          }
+          else {
+            store.dispatch(actions.Logout);
+          }
 				})
 				.catch((err) => {
+          store.dispatch(actions.Logout);
 					store.dispatch(actions.invalidateTarget);
 				});
 		}
+    // If we have no current host then we need to present a login screen
+    if((target == null || target.length === 0) && root === 'nothing')
+      store.dispatch(actions.Logout);
+//      this.startApp('login');
+//      store.setState({nav: {root: 'login'}});
 		if (notificationToken != null && notificationToken != this.notificationToken) {
+      console.log('about to endNotificationToken', notificationToken, this.api)
 			this.api.sendNotificationToken(notificationToken);
 			this.notificationToken = notificationToken;
 		}
@@ -130,10 +145,10 @@ export default class IPCMobile extends Component {
 		// for multiple minutes and this is an anti-pattern in Android apps.
 		// We don't care about this because we are content to let the registration die,
 		// but the console nag is a pain.
-		console.ignoredYellowBox = [
+		YellowBox.ignoreWarnings([
 			'Setting a timer', 'Remote debugger'
-		];
-
+		]);
+    console.log('startApp', root);
 		switchContext(root);
 
 	}

@@ -123,8 +123,7 @@ const styles = StyleSheet.create({
 });
 
 
-import { COLOR, ThemeProvider } from 'react-native-material-ui';
-
+import { COLOR } from 'react-native-material-ui';
 
 const uiTheme = {
 	palette: {
@@ -140,6 +139,5 @@ const uiTheme = {
 
 export {
 	styles,
-	uiTheme,
-	ThemeProvider
+	uiTheme
 };

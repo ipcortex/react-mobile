@@ -84,7 +84,7 @@ class IPCortexAPI {
 
     /**
      * User login to an instance of the API. Async, returns immediately with Promise and caller
-     * need not care too much as ultimately dispatches a 'Login' or 'loginError' state change
+       * need not care too much as ultimately dispatches a 'Login' or 'loginError' state change
      * action on the UI.
      *
      * @method doLogin
@@ -209,6 +209,7 @@ class IPCortexAPI {
 
             if(this.isLoaded) {
                 // Got a PBX obj, resolve to the hostname
+                console.info(`API loaded from ${hostname}`)
                 return hostname;
             } else {
                 throw `loaded PBX but typeof PBX is ${typeof PBX}`;
@@ -231,7 +232,8 @@ class IPCortexAPI {
      * @return {Promise}                        Resolves when server has been set
      */
     async setServer(server, username = 'anonymous') {
-        let response = await fetch(`${IPCortexConfig.proxy}/server/set/${username}/${server}`);
+        let response = await fetch(`${IPCortexConfig.proxy}/server/set/${username}/${server}`, {credentials: 'same-origin'});
+        console.debug('got headers', response.headers);
         if(response.status == 200) {
             let body = await response.text();
             this.haveSetServer = true;
@@ -257,10 +259,11 @@ class IPCortexAPI {
      * @return {Promise}                  resolves when request is complete
      */
     async sendNotificationToken(token) {
+        console.log('sendNotificationToken', token);
         if(token == null)
             return;
         if(this.haveSetServer) {
-            let response = await fetch(`${IPCortexConfig.proxy}/server/token/${token.os}/${token.token}`);
+            let response = await fetch(`${IPCortexConfig.proxy}/server/token/${token.os}/${token.token}`, {credentials: 'same-origin'});
             if(response.status == 200) {
                 let body = await response.text();
             } else {

@@ -25,12 +25,10 @@ class ContactsScreen extends React.Component {
 		collapsingToolBarExpendedColor: '#ffffff' // optional. The TitleBar (navBar) color in expended state
 	};
 	render() {
-		return (
-			<ThemeProvider uiTheme={uiTheme}>
-        <View style={styles.container}>
-          <ContactsList />
-        </View>
-      </ThemeProvider>
+    return (
+      <View style={styles.container}>
+        <ContactsList />
+      </View>
 		);
 	}
 }
