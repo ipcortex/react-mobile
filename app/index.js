@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { AppRegistry, Platform } from 'react-native';
+import { AppRegistry, Platform, YellowBox } from 'react-native';
 import { createStore, applyMiddleware, combineReducers } from "redux";
 
 import { Provider } from "react-redux";
 
-import { Navigation } from 'react-native-navigation';
+import { Navigation, NativeEventsReceiver } from 'react-native-navigation';
 
 import { registerScreens, switchContext } from './screens';
 
@@ -14,6 +14,7 @@ import InCallManager from 'react-native-incall-manager';
 
 
 import pushNotification from './lib/pushNotification';
+import { IPCortexAPI } from './lib/IPCortexAPI';
 
 import AppReducer, { actions } from './reducers';
 
@@ -27,8 +28,6 @@ const store = createStoreWithMiddleware(
 
 var persistor;
 
-if(Platform.OS === 'android')
-    persistor = persistStore(store);
 
 var notification = new pushNotification(store.dispatch,
     actions.notificationToken.token,
@@ -40,17 +39,19 @@ var notification = new pushNotification(store.dispatch,
 //  the app is (re)started which means we don't process background
 //  notifications
 notification.register({
-    Ring: function() {
-        InCallManager.startRingtone('_BUNDLE_',null,null,15);
+    Ring: function () {
+        InCallManager.startRingtone('_BUNDLE_', null, null, 15);
     }
-},
-{
-    Accept: function() {
+}, {
+    Accept: function () {
         InCallManager.stopRingtone();
-        store.dispatch({type: actions.AcceptCall}) },
-    Reject: function() {
+        store.dispatch(actions.Phone);
+        store.dispatch({ type: actions.AcceptCall })
+    },
+    Reject: function () {
         InCallManager.stopRingtone();
-        store.dispatch({type: actions.RejectCall}) }
+        store.dispatch({ type: actions.RejectCall })
+    }
 });
 /**
  * IPCMobile root React Native Component
@@ -61,30 +62,73 @@ notification.register({
 export default class IPCMobile extends Component {
     constructor(props) {
         super(props);
+        this.api = new IPCortexAPI(true, store, Provider);
+        console.info('created', this);
         registerScreens(store, Provider)
             .then(() => {
-                if(Platform.OS === 'ios') {
-                    // Dont fire our first event until we are sure the redux
-                    // persistent store is re-hydrated
-                    persistor = persistStore(store, null, () => {
-                        store.subscribe(this.onStoreUpdate.bind(this));
-                        store.dispatch(actions.Logout);
-                    });
-                } else {
+                // Dont fire our first event until we are sure the redux
+                // persistent store is re-hydrated
+                console.info('screens registered', store);
+                persistor = persistStore(store, null, () => {
+                    console.info('in persistor', store);
                     store.subscribe(this.onStoreUpdate.bind(this));
-                    store.dispatch(actions.Logout);
-                }
+                    this.onStoreUpdate();
+                });
             })
 
     }
 
     onStoreUpdate() {
-        let { root } = store.getState()
-            .nav;
+        let state = store.getState();
+        let { root, refresh } = state.nav
         // handle a root change
-        if(this.currentRoot != root) {
+        //console.log('onStoreUpdate', state.nav, state.auth);
+        if (this.currentRoot != root && root !== 'nothing') {
             this.currentRoot = root;
-            this.startApp(root);
+            this.refresh = refresh;
+            Navigation.isAppLaunched()
+                .then((appLaunched) => {
+                    console.log('isAppLaunched', appLaunched);
+                    if (appLaunched) {
+                        this.startApp(root);
+                    } else
+                        new NativeEventsReceiver()
+                        .appLaunched(() => this.startApp(root));
+                })
+        }
+        let { target, loginToken, notificationToken, targetValid } = state.auth;
+        if (target &&
+            target != '' &&
+            target != this.currentTarget) {
+            this.currentTarget = target;
+            this.api.loadAPI(target);
+        }
+        // If we have no current host then we need to present a login screen
+        if ((target == null || target.length === 0) && root === 'nothing'){
+            store.dispatch(actions.Logout);
+        }
+        //console.log('targetValid before switch', targetValid, this.targetValid);
+        if (!this.targetValid && targetValid) {
+            this.targetValid = targetValid;
+            if (typeof loginToken === 'object') {
+                this.api.doLogin({ token: loginToken }, target)
+                    // If we succeded, fire state transition
+                    .then((status) => {
+                        store.dispatch(actions.Login);
+                        console.log(status);
+                    })
+                    // failed? no point hanging on to a duff token but do_login cant do this for us
+                    .catch((err) => {
+                        console.log('this.api.dologin: err: ', err);
+                        store.dispatch(actions.setLoginToken.token(null));
+                        store.dispatch(actions.Logout);
+                    });
+            }
+        }
+        if (notificationToken != null && notificationToken != this.notificationToken) {
+            //console.log('about to sendNotificationToken', notificationToken, this.api)
+            this.api.sendNotificationToken(notificationToken);
+            this.notificationToken = notificationToken;
         }
     }
 
@@ -93,9 +137,10 @@ export default class IPCMobile extends Component {
         // for multiple minutes and this is an anti-pattern in Android apps.
         // We don't care about this because we are content to let the registration die,
         // but the console nag is a pain.
-        console.ignoredYellowBox = [
-                'Setting a timer'
-        ];
+        YellowBox.ignoreWarnings([
+			'Setting a timer', 'Remote debugger'
+		]);
+        console.log('startApp', root);
         switchContext(root);
 
     }

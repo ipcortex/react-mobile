@@ -6,6 +6,8 @@ import { ForwardScreen } from './ForwardScreen';
 import { ContactsScreen } from './ContactsScreen';
 import { RecentsScreen } from './RecentsScreen';
 
+import { ContactSearchHeader } from '../components/ContactsList';
+
 let phoneIcon, settingsIcon, peopleIcon, recentsIcon;
 /**
  * Implements react-native-navigation screen layout for this app.
@@ -21,18 +23,25 @@ let phoneIcon, settingsIcon, peopleIcon, recentsIcon;
  */
 async function registerScreens(store, Provider) {
 try{
+
   phoneIcon = await Icon.getImageSource('phone', 30);
   settingsIcon = await Icon.getImageSource('settings', 30);
   peopleIcon = await Icon.getImageSource('account-multiple', 30);
   recentsIcon = await Icon.getImageSource('phone-log', 30);
 
+  console.log(JSON.stringify({phoneIcon, settingsIcon, peopleIcon, recentsIcon}));
+
+
+// Screens
   Navigation.registerComponent('IPCMobile.Login', () => LoginScreen, store, Provider);
   Navigation.registerComponent('IPCMobile.Phone', () => PhoneScreen, store, Provider);
   Navigation.registerComponent('IPCMobile.Forward', () => ForwardScreen, store, Provider);
   Navigation.registerComponent('IPCMobile.Contacts', () => ContactsScreen, store, Provider);
-	Navigation.registerComponent('IPCMobile.Recents', () => RecentsScreen, store, Provider);
+  Navigation.registerComponent('IPCMobile.Recents', () => RecentsScreen, store, Provider);
+// Independent components used in headers and other Nav constructs.
+  Navigation.registerComponent('IPCMobile.ContactSearchHeader', () => ContactSearchHeader, store, Provider);
 
-  return(true);
+  return true;
 
 }
 catch (e) {

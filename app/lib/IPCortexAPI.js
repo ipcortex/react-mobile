@@ -10,6 +10,8 @@ var {
     getUserMedia,
 } = WebRTC;
 
+import { actions } from '../reducers';
+
 import IPCortexConfig from '../config/ipcortex';
 
 // This module was initially conceived to pull the API from the target
@@ -22,7 +24,8 @@ import IPCortexConfig from '../config/ipcortex';
 //        the global namespace
 // false = load from the PBX and hide them in this module
 const localAPIBuild = true;
-// Remove next two lines if localAPIBuild === false
+// Remove next three lines if localAPIBuild === false
+global.chrome = {storage: AsyncStorage}
 import expJsSIP from 'jssip';
 import expIPCortex from 'ipcortex-api';
 
@@ -64,16 +67,48 @@ class IPCortexAPI {
      * behaviour is usually what is needed unless instaces are used against different
      * PBXs or different users
      */
-    constructor(singleInstance = true) {
+    constructor(singleInstance = true, store, Provider) {
         // By default we use one instance of the API for all
         //  instantiations of this class, as this is what we mostly want.
         if(singleInstance)
             Object.assign(this, state);
-
+        if(store != null && Provider != null){
+            Object.assign(state, {store, Provider});
+            Object.assign(this, {store, Provider});
+        }
     }
 
     startFeed() {
 
+    }
+
+    /**
+     * User login to an instance of the API. Async, returns immediately with Promise and caller
+       * need not care too much as ultimately dispatches a 'Login' or 'loginError' state change
+     * action on the UI.
+     *
+     * @method doLogin
+     * @param  {Object} credentials eiher {username: 'username', password: 'password' }, or {token:}
+     *
+     */
+    async doLogin(credentials, target) {
+        try {
+            await this.setServer(target, credentials.username)
+
+            await this.IPCortex.PBX.Auth.login(Object.assign({
+                notoken: false,
+                nodom: true,
+                tokenCB: (token) => this.store.dispatch(actions.setLoginToken.token(token))
+            }, credentials));
+            await this.IPCortex.PBX.startFeed({
+                device: true
+            });
+            return "OK";
+
+        } catch(err) {
+            this.store.dispatch(actions.loginError.message(err.toString()));
+            throw "login fail";
+        }
     }
 
     patch(module, text) {
@@ -100,7 +135,7 @@ class IPCortexAPI {
     /**
      * Load the API from a specific PBX
      *
-     * @method setServer
+     * @method loadAPI
      * @param  {string}  hostname PBX hostname
      * @return {Promise}
      */
@@ -170,17 +205,19 @@ class IPCortexAPI {
             //Object.assign(state.Auth, state.PBX.Auth);
             // Also stash the created API plus the WebRTC object it references in this instance
             Object.assign(this, state);
-
-
             if(this.isLoaded) {
                 // Got a PBX obj, resolve to the hostname
+                console.log(`API loaded from ${hostname}`);
+                this.store.dispatch(actions.validateTarget);
                 return hostname;
             } else {
+                this.store.dispatch(actions.inValidateTarget);
                 throw `loaded PBX but typeof PBX is ${typeof PBX}`;
             }
 
         } catch(error) {
-
+          console.info(`API error ${errro.toString()}`);
+            this.store.dispatch(actions.inValidateTarget);
             throw `${error.toString()} reading from ${hostname}`
         }
     }
@@ -196,13 +233,15 @@ class IPCortexAPI {
      * @return {Promise}                        Resolves when server has been set
      */
     async setServer(server, username = 'anonymous') {
-        let response = await fetch(`${IPCortexConfig.proxy}/server/set/${username}/${server}`);
+        let response = await fetch(`${IPCortexConfig.proxy}/server/set/${username}/${server}`, {credentials: 'same-origin'});
+        console.debug('got headers', response.headers);
         if(response.status == 200) {
             let body = await response.text();
             this.haveSetServer = true;
-            if (this.tokenToSend){
-                await this.sendNotificationToken(this.tokenToSend);
-                delete this.tokenToSend;
+            if (state.tokenToSend){
+                console.log(`NOW sending paused token ${state.tokenToSend}`);
+                await this.sendNotificationToken(state.tokenToSend);
+                delete state.tokenToSend;
             }
             this.PBX.Auth.setHost(IPCortexConfig.proxy);
         } else {
@@ -221,19 +260,21 @@ class IPCortexAPI {
      * @return {Promise}                  resolves when request is complete
      */
     async sendNotificationToken(token) {
+        console.log('sendNotificationToken', token);
         if(token == null)
             return;
         if(this.haveSetServer) {
-            let response = await fetch(`${IPCortexConfig.proxy}/server/token/${token.os}/${token.token}`);
+            let response = await fetch(`${IPCortexConfig.proxy}/server/token/${token.os}/${token.token}`, {credentials: 'same-origin'});
             if(response.status == 200) {
                 let body = await response.text();
             } else {
                 // try again later perhaps
-                this.tokenToSend = token;
+                state.tokenToSend = token;
                 throw `could not set token at proxy ${IPCortexConfig.proxy}`;
             }
         } else {
-            this.tokenToSend = token;
+            console.log(`NOT sending token ${token} yet`);
+            state.tokenToSend = token;
         }
     }
 
