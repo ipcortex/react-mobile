@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { styles, uiTheme } from '../config/styles.js';
 
-const phoneIcons = ["phone-hangup", "phone", "phone-in-talk", "phone-incoming"];
+const phoneIcons = ["phone-hangup", "phone", "phone-in-talk", "phone-incoming", "cellphone-android"];
 const iconColors = {
   "online": "#00bb00",
   "away": "#e09131",

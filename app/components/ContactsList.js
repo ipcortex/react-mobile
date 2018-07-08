@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Navigation } from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import NativeContacts from 'react-native-contacts';
 
 import {
 	Button,
@@ -97,6 +98,11 @@ class ContactsList extends Component {
 						this.props.updateContact(this.mapContact(contact));
 					});
 				});
+        NativeContacts.getAll((err, nativeContacts) => {
+          this.props.addContacts(
+            nativeContacts.map(this.mapNativeContact)
+  				);
+        });
 				resolve();
 			});
 		});
@@ -128,6 +134,16 @@ class ContactsList extends Component {
 			blf: contact.blf,
 			state: contact.canCall ? 'online' : 'offline',
 			number: contact.number
+		};
+	}
+  mapNativeContact(contact) {
+    //TODO lot smarter, interstitial, merge etc
+		return {
+			key: contact.recordID + '',
+			name: `${contact.givenName} ${contact.familyName}`,
+			blf: 4,
+			state: 'online',
+			number: contact.phoneNumbers[0].number
 		};
 	}
 	alphabetise(contacts) {
