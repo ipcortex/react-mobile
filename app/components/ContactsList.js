@@ -37,7 +37,7 @@ class SearchBar extends Component {
 	render() {
 		const width = Dimensions.get(`window`)
 			.width;
-		console.log('Searchbar', this.props, { width });
+		//console.log('Searchbar', this.props, { width });
 		return (<View style={[{ width }, styles.header_container]}>
                 <TextInput
                     ref={(ref) => {this.textInput = ref}}

@@ -23,10 +23,15 @@ let phoneIcon, settingsIcon, peopleIcon, recentsIcon;
  */
 async function registerScreens(store, Provider) {
 try{
+
   phoneIcon = await Icon.getImageSource('phone', 30);
   settingsIcon = await Icon.getImageSource('settings', 30);
   peopleIcon = await Icon.getImageSource('account-multiple', 30);
   recentsIcon = await Icon.getImageSource('phone-log', 30);
+
+  console.log(JSON.stringify({phoneIcon, settingsIcon, peopleIcon, recentsIcon}));
+
+
 // Screens
   Navigation.registerComponent('IPCMobile.Login', () => LoginScreen, store, Provider);
   Navigation.registerComponent('IPCMobile.Phone', () => PhoneScreen, store, Provider);
@@ -36,7 +41,7 @@ try{
 // Independent components used in headers and other Nav constructs.
   Navigation.registerComponent('IPCMobile.ContactSearchHeader', () => ContactSearchHeader, store, Provider);
 
-  return(true);
+  return true;
 
 }
 catch (e) {

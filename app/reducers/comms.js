@@ -16,7 +16,7 @@ export const actions = {
 };
 
 export default function commsReducer(state = initialCommsState, action) {
-    console.log('Action: ', action);
+    //console.log('Action: ', action);
   switch(action.type) {
   case actions.Dial:
     return {
