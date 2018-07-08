@@ -171,6 +171,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-contacts')
 
     compile project(':react-native-webrtc')
     compile project(':react-native-vector-icons')
