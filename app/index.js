@@ -68,7 +68,9 @@ export default class IPCMobile extends Component {
             .then(() => {
                 // Dont fire our first event until we are sure the redux
                 // persistent store is re-hydrated
+                console.info('screens registered', store);
                 persistor = persistStore(store, null, () => {
+                    console.info('in persistor', store);
                     store.subscribe(this.onStoreUpdate.bind(this));
                     this.onStoreUpdate();
                 });
@@ -80,7 +82,7 @@ export default class IPCMobile extends Component {
         let state = store.getState();
         let { root, refresh } = state.nav
         // handle a root change
-        console.log('onStoreUpdate', state.nav, state.auth);
+        //console.log('onStoreUpdate', state.nav, state.auth);
         if (this.currentRoot != root && root !== 'nothing') {
             this.currentRoot = root;
             this.refresh = refresh;
@@ -105,7 +107,7 @@ export default class IPCMobile extends Component {
         if ((target == null || target.length === 0) && root === 'nothing'){
             store.dispatch(actions.Logout);
         }
-        console.log('targetValid before switch', targetValid, this.targetValid);
+        //console.log('targetValid before switch', targetValid, this.targetValid);
         if (!this.targetValid && targetValid) {
             this.targetValid = targetValid;
             if (typeof loginToken === 'object') {
@@ -124,7 +126,7 @@ export default class IPCMobile extends Component {
             }
         }
         if (notificationToken != null && notificationToken != this.notificationToken) {
-            console.log('about to endNotificationToken', notificationToken, this.api)
+            //console.log('about to sendNotificationToken', notificationToken, this.api)
             this.api.sendNotificationToken(notificationToken);
             this.notificationToken = notificationToken;
         }
