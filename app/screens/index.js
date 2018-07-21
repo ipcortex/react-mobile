@@ -29,8 +29,6 @@ try{
   peopleIcon = await Icon.getImageSource('account-multiple', 30);
   recentsIcon = await Icon.getImageSource('phone-log', 30);
 
-  console.log(JSON.stringify({phoneIcon, settingsIcon, peopleIcon, recentsIcon}));
-
 
 // Screens
   Navigation.registerComponent('IPCMobile.Login', () => LoginScreen, store, Provider);
