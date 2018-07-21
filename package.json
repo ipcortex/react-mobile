@@ -7,7 +7,8 @@
     "test": "jest",
     "run-web": "./node_modules/.bin/webpack-dev-server -d --config ./web/webpack.config.js --inline --hot --colors",
     "run-ios": "react-native run-ios",
-    "run-android": "react-native run-android"
+    "run-android": "adb shell su root date $(date +%m%d%H%M%Y.%S); react-native run-android",
+    "timesync": "adb shell su root date $(date +%m%d%H%M%Y.%S)"
   },
   "dependencies": {
     "api": "file:../ipc-api",
