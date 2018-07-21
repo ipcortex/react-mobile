@@ -39,7 +39,7 @@ export default class PhoneNumber extends Component {
         textAlign={'center'}
         placeholder={'number'}
         onChangeText = {(text) => this.setState({number: text})}
-        value={this.state.number}
+        value={this.props.number}
         keyboardType="phone-pad"/>
       </View>
     </View>);
