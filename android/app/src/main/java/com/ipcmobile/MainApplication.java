@@ -36,11 +36,10 @@ public class MainApplication extends NavigationApplication {
             new VectorIconsPackage(),
             new RNSensitiveInfoPackage(),
             new ReactNativePushNotificationPackage(),
-            new InCallManagerPackage()
+            new InCallManagerPackage(),
+            new ReactNativeContacts()
       );
     }
-
-
 
 
   @Override
