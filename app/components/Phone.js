@@ -202,7 +202,7 @@ class Phone extends Component {
                 if (device.calls.length > 0) {
                     callState = device.calls[0].state;
                     callNrState = device.calls[0].nrState;
-                    party = device.calls[0].party;
+                    const { number, party } = device.calls[0];
                 }
                 if (callState === 'ring' && party === 'caller')
                     callState = 'dial';
@@ -230,7 +230,7 @@ class Phone extends Component {
                     break;
                 case 'up':
                     InCallManager.start({ media: 'audio' });
-                    this.setState({ callState, callNrState });
+                    this.setState({ callState, callNrState, dialNumber: number });
                     /* If the call is up and has media, attach it to the video tag */
                     if (device.calls[0].remoteMedia && device.calls[0].remoteMedia.length > 0)
                         this.setState({ videoURL: device.calls[0].remoteMedia[0].toURL() });

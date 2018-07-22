@@ -2,11 +2,14 @@ import React, { Component } from 'react';
 import { Navigation } from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import NativeContacts from 'react-native-contacts';
-import { PermissionsAndroid } from 'react-native';
+import { Dialog, DialogDefaultActions, Container } from 'react-native-material-ui';
 
 import {
     Button,
     Dimensions,
+    FlatList,
+    Modal,
+    PermissionsAndroid,
     Platform,
     StyleSheet,
     TouchableHighlight,
@@ -18,7 +21,7 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 
-import Contact from './Contact';
+import { Contact, Number } from './Contact';
 
 import { IPCortexAPI } from '../lib/IPCortexAPI';
 import { actions } from '../reducers';
@@ -83,7 +86,7 @@ export { ContactSearchHeader };
 class ContactsList extends Component {
     constructor(props) {
         super(props);
-        this.state = { refreshing: false };
+        this.state = { refreshing: false, modalVisible: false };
         this.IPCortex = new IPCortexAPI();
         this.loadContacts = this.loadContacts.bind(this);
         this.updateContacts = this.updateContacts.bind(this);
@@ -137,7 +140,9 @@ class ContactsList extends Component {
         NativeContacts.getAll((err, nativeContacts) => {
             console.log('getAll', err, Object.keys(nativeContacts));
             this.props.addContacts(
-                nativeContacts.map(this.mapNativeContact)
+                nativeContacts
+                .map(this.mapNativeContact)
+                .filter(c => (c.phone && c.phone.length))
             );
         });
     }
@@ -164,21 +169,21 @@ class ContactsList extends Component {
     }
     mapContact(contact) {
         return {
-            key: contact.key + '',
+            key: contact.key + contact.name,
             name: contact.name,
             blf: contact.blf,
             state: contact.canCall ? 'online' : 'offline',
-            number: contact.number
+            phone: [{ label: 'local', key: 'local', number: contact.number }]
         };
     }
     mapNativeContact(contact) {
         //TODO lot smarter, interstitial, merge etc
         return {
-            key: contact.recordID + '',
+            key: contact.recordID + contact.name,
             name: `${contact.givenName} ${contact.familyName}`,
             blf: 4,
             state: 'online',
-            number: contact.phoneNumbers[0].number
+            phone: contact.phoneNumbers.map(n => ({ ...n, key: n.label }))
         };
     }
     alphabetise(contacts) {
@@ -200,20 +205,70 @@ class ContactsList extends Component {
     }
     renderIndividualContact({ item }) {
         return (
-            <Contact contact={item} dial={this.props.dial(item.number)}/>
+            <Contact contact={item} dial={() => this.dial(item)}/>
         );
+    }
+    renderNumber(number) {
+        console.log('called with: ', number);
+        return (
+            <Number number={number} contact={this.state.currentContact} dial={() => {
+                this.setModalVisible(false);
+                this.props.dial(number.number);
+              }}/>
+        );
+    }
+    setModalVisible(visible) {
+        this.setState({ modalVisible: visible });
+    }
+
+    dial(item) {
+        console.log('dial called to dial on ', item, item.phone[0].number, this.props.dial);
+        this.setState({ currentContact: item });
+        this.setModalVisible(true);
+        //this.props.dial(item.phone[0].number);
     }
     render() {
         console.log('called to re-render');
-        return (
-            <SectionList
+        return (<View>
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={this.state.modalVisible}
+            onRequestClose={() => {
+              alert('Modal has been closed.');
+            }}>
+            <View style="styles.container">
+              <Dialog.Title>
+                <Text>
+                  Call {this.state.currentContact && this.state.currentContact.name}
+                </Text>
+              </Dialog.Title>
+              <Dialog.Content>
+                  <FlatList
+                    data={this.state.currentContact && this.state.currentContact.phone}
+                    renderItem={({item}) => this.renderNumber(item)}
+                    />
+              </Dialog.Content>
+              <Dialog.Actions>
+                <DialogDefaultActions
+                  actions={['cancel', 'ok']}
+                  /**
+                  * this will disable the button for "ok"
+                  */
+                  options={{ ok: { disabled: true } }}
+                  onActionPress={() => {this.setModalVisible(false);}}
+                  />
+              </Dialog.Actions>
+            </View>
+          </Modal>
+          <SectionList
             sections={this.alphabetise(this.props.contacts.filter((contact) => contact.hide?null:contact))}
             renderItem={this.renderIndividualContact}
             renderSectionHeader={this.renderSectionHeader}
             onRefresh={this.onRefresh}
             refreshing={this.state.refreshing}
             />
-        );
+        </View>);
     }
 };
 
@@ -225,7 +280,7 @@ const mapDispatchToProps = dispatch => ({
     addContacts: (contacts) => dispatch({ type: actions.AddContacts, contacts }),
     updateContact: (contact) => dispatch({ type: actions.UpdateContact, contact }),
     deleteContact: (key) => dispatch({ type: actions.DeleteContact, key }),
-    dial: (number) => () => dispatch({ type: actions.Dial, number })
+    dial: (number) => dispatch({ type: actions.Dial, number })
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ContactsList);

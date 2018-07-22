@@ -11,7 +11,12 @@ export default function contactsReducer(state = initialContactsState, action) {
 	let newState;
 	switch (action.type) {
 	case actions.AddContacts:
-		newState = sortContacts(state.concat(action.contacts));
+    let newContacts = action.contacts.filter( contact => {
+      return !state.find(c => {
+          return (c.name === contact.name) && contact.phone.concat(c.phone)
+      })
+    });
+		newState = sortContacts(state.concat(newContacts));
 		break;
 	case actions.UpdateContact:
 		let updated = false;

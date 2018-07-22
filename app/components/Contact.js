@@ -18,7 +18,7 @@ const iconColors = {
   "dnd": "#e09131"
 };
 
-export default function Contact({contact, dial}) {
+function Contact({contact, dial}) {
   return (
     <TouchableHighlight onPress={dial}>
       <View style={{
@@ -41,3 +41,30 @@ export default function Contact({contact, dial}) {
     </TouchableHighlight>
   );
 };
+
+function Number({number, contact, dial}) {
+  return (
+    <TouchableHighlight onPress={dial}>
+      <View style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 25,
+        paddingVertical: 3
+      }}>
+        <Text style={styles.contact_text}>{number.label}</Text>
+        <Text style={styles.contact_text}>{number.number}</Text>
+        <Icon
+          name={phoneIcons[contact.blf]}
+          style={{
+            color: iconColors[contact.state] || "#d1312b",
+            padding: 6
+          }}
+          size={32}
+        />
+      </View>
+    </TouchableHighlight>
+  );
+};
+
+export {Contact, Number };
