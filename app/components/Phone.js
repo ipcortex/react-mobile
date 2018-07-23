@@ -202,7 +202,7 @@ class Phone extends Component {
                 if (device.calls.length > 0) {
                     callState = device.calls[0].state;
                     callNrState = device.calls[0].nrState;
-                    const { number, party } = device.calls[0];
+                    var { number, party } = device.calls[0];
                 }
                 if (callState === 'ring' && party === 'caller')
                     callState = 'dial';
@@ -241,7 +241,7 @@ class Phone extends Component {
                     this.setState({
                         callState,
                         callNrState,
-                        description: `Call from ${this.myPhone.calls[0].number}`
+                        description: `Call from ${number}`
                     });
                     // If we have a stacked accept or reject then use it
                     //    (days/weeks later !!! - is this safe)
