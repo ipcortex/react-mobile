@@ -98,7 +98,8 @@ class IPCortexAPI {
             await this.IPCortex.PBX.Auth.login(Object.assign({
                 notoken: false,
                 nodom: true,
-                tokenCB: (token) => this.store.dispatch(actions.setLoginToken.token(token))
+                application: 'longLogin',
+                tokenCB: (token) => this.store.dispatch(actions.setLoginToken.token(Object.keys(token)))
             }, credentials));
             await this.IPCortex.PBX.startFeed({
                 device: true
@@ -196,6 +197,9 @@ class IPCortexAPI {
                 Object.assign(state, { Auth: state.IPCortex.PBX.Auth, PBX: state.IPCortex.PBX });
 
             } else {
+                // Presence or absence of keevioWebSocket in global scope is 'magic' way API
+                // knows whether it should be in mobile mode or not (sigh).
+                state.keevioWebSocket = global.keevioWebSocket = WebSocket;
                 state.IPCortex = global.IPCortex = global.window.IPCortex
                 state.JsSIP = global.JsSIP;
                 // Purely to make IPCortexAPI.IPCortex.PBX.blah contract to something less obviously

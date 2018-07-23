@@ -78,7 +78,7 @@ class LoginWidget extends Component {
         /** If not isLoggedIn, the last login error */
         loginError: PropTypes.string,
         /** Login token returned by last API login, may or may not be valid */
-        loginToken: PropTypes.object,
+        loginToken: PropTypes.array,
         /** Push token */
         notificationToken: PropTypes.object,
         /** The target PBX hostname */

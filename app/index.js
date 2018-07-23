@@ -107,9 +107,10 @@ export default class IPCMobile extends Component {
         if ((target == null || target.length === 0) && root === 'nothing'){
             store.dispatch(actions.Logout);
         }
-        //console.log('targetValid before switch', targetValid, this.targetValid);
+        console.log('targetValid before switch', targetValid, this.targetValid);
         if (!this.targetValid && targetValid) {
             this.targetValid = targetValid;
+            console.log('typeof loginToken', typeof loginToken, loginToken);
             if (typeof loginToken === 'object') {
                 this.api.doLogin({ token: loginToken }, target)
                     // If we succeded, fire state transition

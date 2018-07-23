@@ -3,6 +3,7 @@ package com.ipcmobile;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.rt2zz.reactnativecontacts.ReactNativeContacts;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.zxcpoiu.incallmanager.InCallManagerPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
@@ -35,11 +36,10 @@ public class MainApplication extends NavigationApplication {
             new VectorIconsPackage(),
             new RNSensitiveInfoPackage(),
             new ReactNativePushNotificationPackage(),
-            new InCallManagerPackage()
+            new InCallManagerPackage(),
+            new ReactNativeContacts()
       );
     }
-
-
 
 
   @Override
