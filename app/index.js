@@ -82,7 +82,7 @@ export default class IPCMobile extends Component {
         let state = store.getState();
         let { root, refresh } = state.nav
         // handle a root change
-        //console.log('onStoreUpdate', state.nav, state.auth);
+        console.log('onStoreUpdate', state.nav, state.auth);
         if (this.currentRoot != root && root !== 'nothing') {
             this.currentRoot = root;
             this.refresh = refresh;
@@ -112,7 +112,7 @@ export default class IPCMobile extends Component {
             this.targetValid = targetValid;
             console.log('typeof loginToken', typeof loginToken, loginToken);
             if (typeof loginToken === 'object') {
-                this.api.doLogin({ token: loginToken }, target)
+                this.api.doLogin({ token: Array.from(loginToken) }, target)
                     // If we succeded, fire state transition
                     .then((status) => {
                         store.dispatch(actions.Login);
