@@ -25,7 +25,7 @@ class InputDomainName extends Component {
     }
     render() {
 
-        return(<TextInput
+        return (<TextInput
                 value={this.state.value}
                 onChangeText={(text) => this.validateStyle(text, false)}
                 onSubmitEditing={(event) => this.submit()}
@@ -37,26 +37,26 @@ class InputDomainName extends Component {
     // This is approximately a FQDN
     // TODO IDNs?
     static validate(text) {
-        return(text.match(/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/) != null)
+        return (text.match(/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/) != null)
     }
 
     validateStyle(text, final) {
         const valid = InputDomainName.validate(text);
         this.setState({ value: text.toLowerCase() });
-        if(text === '')
+        if (text === '')
             this.setState({ style: styles[this.state.baseStyle] });
-        else if(valid && styles[this.state.baseStyle + 'OK'])
+        else if (valid && styles[this.state.baseStyle + 'OK'])
             this.setState({ style: styles[this.state.baseStyle + 'OK'] });
-        else if(!valid && !final && styles[this.state.baseStyle + 'Warning'])
+        else if (!valid && !final && styles[this.state.baseStyle + 'Warning'])
             this.setState({ style: styles[this.state.baseStyle + 'Warning'] });
-        else if(!valid && final && styles[this.state.baseStyle + 'Error'])
+        else if (!valid && final && styles[this.state.baseStyle + 'Error'])
             this.setState({ style: styles[this.state.baseStyle + 'Error'] });
-        return(valid);
+        return (valid);
     }
 
     submit() {
         let text = this.state.value;
-        if(this.validateStyle(text, true))
+        if (this.validateStyle(text, true))
             this.props.onSubmit(text);
     }
 
@@ -78,7 +78,7 @@ class LoginWidget extends Component {
         /** If not isLoggedIn, the last login error */
         loginError: PropTypes.string,
         /** Login token returned by last API login, may or may not be valid */
-        loginToken: PropTypes.object,
+        loginToken: PropTypes.array,
         /** Push token */
         notificationToken: PropTypes.object,
         /** The target PBX hostname */
@@ -95,43 +95,9 @@ class LoginWidget extends Component {
      */
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = { doLogin: false };
         this.IPCortex = new IPCortexAPI();
 
-        // If we are a bit out of sync (just restarted and have old state
-        // from redux rehydrate) then force an API reload if we have no API
-        // but think we have
-        if(!this.props.target || this.props.target === '')
-            this.props.dispatch(actions.invalidateTarget);
-        else if(this.props.target &&
-            this.props.target != '') {
-            this.props.dispatch(actions.invalidateTarget);
-            this.IPCortex.loadAPI(this.props.target)
-                .then((hostname) => {
-                    this.props.dispatch(actions.validateTarget);
-                })
-                .catch((err) => {
-                    this.setState({ apiError: err.toString() });
-                });
-        }
-
-
-
-    }
-    // Called by react when props are about to change
-    componentWillReceiveProps(newProps, newState) {
-        // If the API just initialised and we have a previous login token then give it a try
-        if(newProps.targetValid === true && this.props.targetValid === false)
-            if(typeof newProps.loginToken === 'object')
-                this.do_login({ token: this.props.loginToken })
-                // Nothing to do if we succeded, do_login takes care of firing state changes
-                .then((status) => console.log(status))
-                // failed? no point hanging on to a duff token but do_login cant do this for us
-                .catch((err) => {
-                    this.props.dispatch(actions.setLoginToken.token(null));
-                });
-        else (newProps.notificationToken != null && newProps.notificationToken != this.props.notificationToken)
-            this.IPCortex.sendNotificationToken(newProps.notificationToken);
     }
     /**
      * Render inline tags to output confirmation of current login server (if API is valid),
@@ -141,65 +107,37 @@ class LoginWidget extends Component {
      * @return {ReactTags}    JSX fragment to use in upstream render
      */
     input_server() {
-        if(this.props.targetValid) {
-            return(<View style={styles.hsubThin}>
+        if (this.props.targetValid) {
+            return (<View style={styles.hsubThin}>
           <View style={styles.label}><Text>Login to {this.props.target}</Text></View>
           <View style={styles.control}><Button onPress={() => this.props.dispatch( actions.invalidateTarget )} title="Change Server"/></View>
       </View>)
         } else {
-            return(<View style={styles.vsub}>
+            return (<View style={styles.vsub}>
           <Text>Server</Text>
           <InputDomainName
               value={this.props.target}
               onSubmit={(text) => {
-                                this.props.dispatch( actions.setTarget.hostname(text) );
-                                if(text != '')
-                                    this.IPCortex.loadAPI(text)
-                                    .then((hostname) => this.props.dispatch(actions.validateTarget))
-                                    .catch((err) => {
-                                            this.props.dispatch(actions.invalidateTarget);
-                                            this.setState({ apiError: err.toString() });
-                                    })
-                        }
+                      this.setState({hostname: text});
+                      this.props.dispatch(actions.setTarget.hostname(text));
               }
+            }
               />
           <Text>{this.state.apiError}</Text>
       </View>)
         }
     }
-    /**
-     * User login to an instance of the API. Async, returns immediately with Promise and caller
-     * need not care too much as ultimately dispatches a 'Login' or 'loginError' state change
-     * action on the UI.
-     *
-     * @method do_login
-     * @param  {Object} credentials eiher {username: 'username', password: 'password' }, or {token:}
-     *
-     */
-    async do_login(credentials) {
-        try {
-            await this.IPCortex.setServer(this.props.target, credentials.username)
 
-            await this.IPCortex.PBX.Auth.login(Object.assign({
-                notoken: false,
-                nodom: true,
-                tokenCB: (token) => this.props.dispatch(actions.setLoginToken.token(token))
-            }, credentials));
-            await this.IPCortex.PBX.startFeed({
-                device: true
-            });
-            this.props.dispatch(actions.Login);
-            return "OK";
 
-        } catch(err) {
-            this.props.dispatch(actions.loginError.message(err.toString()));
-            throw "login fail";
-        }
+    do_login() {
+        this.IPCortex.doLogin({ username: this.state.username, password: this.state.password }, this.props.target)
+            .then((status) => this.props.dispatch(actions.Login))
+            .catch((err) => console.log('login failed'));
+
     }
-
     input_login() {
-        if(this.props.targetValid)
-            return(<View style={styles.vsub}>
+        if (this.props.targetValid)
+            return (<View style={styles.vsub}>
                 <View style={styles.hsub}>
                 <View style={{flex:0.1}}/>
                     <View style={{flex:1}}>
@@ -222,14 +160,14 @@ class LoginWidget extends Component {
                     value={this.state.password}
                     secureTextEntry={true}
                     placeholder={'Password'}
-                    onSubmitEditing={() => this.do_login({username: this.state.username, password: this.state.password})}
+                    onSubmitEditing={() => this.do_login()}
                   />
               </View>
           <View style={{flex:0.1}}/>
           </View>
           <View style={{flex: 4}}>
               <Button style={{flex: 4}}
-                  onPress={() => this.do_login({username: this.state.username, password: this.state.password})}
+                  onPress={() => this.do_login()}
                   title="Login"/>
               </View>
             <Text>{this.props.loginError}</Text>
@@ -239,15 +177,29 @@ class LoginWidget extends Component {
         return;
     }
 
-
+    componentDidMount() {
+        console.info('componentDidMount', arguments);
+    }
+    shouldComponentUpdate(props, state) {
+        console.info('shouldComponentUpdate', this.props, arguments);
+        return (true);
+    }
     render() {
-        console.log('render: props: ', this.props, this);
-        return(<View style={styles.vsub}>
-            <View style={styles.vsubThin}>{this.input_server()}</View>
-        <View style={styles.vsub}>{(this.props.targetValid)?this.input_login():
-        (<Text>Enter your PBX server domain name</Text>)}</View>
-    <View/>
-</View>);
+        console.info('render: props: ', this.props);
+        return (<View style={styles.vsub}>
+          <View style={styles.vsubThin}>
+            {this.input_server()}
+          </View>
+          <View style={styles.vsub}>
+            {(this.props.targetValid)?this.input_login():
+              (
+                <Text>
+                  Enter your PBX server domain name
+                </Text>
+              )}
+            </View>
+            <View/>
+          </View>);
 
 
     }
@@ -255,7 +207,6 @@ class LoginWidget extends Component {
 
 
 const mapStateToProps = state => ({
-    dispatch: state.dispatch,
     isLoggedIn: state.auth.isLoggedIn,
     loginError: state.loginError,
     loginToken: state.auth.loginToken,
@@ -264,4 +215,8 @@ const mapStateToProps = state => ({
     targetValid: state.auth.targetValid,
 });
 
-export default connect(mapStateToProps)(LoginWidget);
+const mapDispatchToProps = dispatch => ({
+    dispatch,
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginWidget);

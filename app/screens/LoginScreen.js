@@ -16,14 +16,6 @@ import LoginWidget from '../components/LoginWidget';
 
 class LoginScreen extends React.Component {
 
-  static navigationOptions = {
-    title: `${ Platform.OS } App Login`
-  };
-  static propTypes = {
-    navigation: PropTypes.object
-
-  };
-
   render() {
     return ( <View style={styles.container}>
       <LoginWidget/>
@@ -31,7 +23,6 @@ class LoginScreen extends React.Component {
   }
 }
 
-AppRegistry.registerComponent( 'LoginScreen', () => LoginScreen );
 
 export {
   LoginScreen
