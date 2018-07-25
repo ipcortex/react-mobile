@@ -94,7 +94,7 @@ class IPCortexAPI {
     async doLogin(credentials, target) {
         try {
             await this.setServer(target, credentials.username)
-
+            console.log('Credentials: ', credentials);
             await this.IPCortex.PBX.Auth.login(Object.assign({
                 notoken: false,
                 nodom: true,
